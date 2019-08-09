@@ -77,7 +77,7 @@ moves <- custom_moves()
 out <- outbreaker(data = data,config = config,priors = priors,
                   likelihoods = likelihoods,moves = moves)
 
-saveRDS(out, file = "no_import_thresh001.rds")
+saveRDS(out, file = "fake_outbreak_runs/no_import_thresh001.rds")
 
 config$outlier_threshold <- 0.05
 
@@ -86,7 +86,7 @@ config <- create_config(config, data = data)
 out <- outbreaker(data = data,config = config,priors = priors,
                   likelihoods = likelihoods,moves = moves)
 
-saveRDS(out, file = "no_import_thresh005.rds")
+saveRDS(out, file = "fake_outbreak_runs/no_import_thresh005.rds")
 
 config$outlier_threshold <- 0.9
 config$outlier_relative <- TRUE
@@ -98,7 +98,7 @@ config <- create_config(data = data,
 out <- outbreaker(data = data,config = config,priors = priors,
                   likelihoods = likelihoods,moves = moves)
 
-saveRDS(out, file = "no_import_thresh09.rds")
+saveRDS(out, file = "fake_outbreak_runs/no_import_thresh09.rds")
 
 config$outlier_threshold <- 0.95
 
@@ -109,7 +109,7 @@ config <- create_config(data = data,
 out <- outbreaker(data = data,config = config,priors = priors,
                   likelihoods = likelihoods,moves = moves)
 
-saveRDS(out, file = "no_import_thresh095.rds")
+saveRDS(out, file = "fake_outbreak_runs/no_import_thresh095.rds")
 
 data$import <- dt_cases$import
 config$find_import <- FALSE
@@ -121,7 +121,7 @@ config <- create_config(data = data,
 
 out <- outbreaker(data = data,config = config,priors = priors,
                   likelihoods = likelihoods,moves = moves)
-saveRDS(out, file = "with_import.rds")
+saveRDS(out, file = "fake_outbreak_runs/with_import.rds")
 
 config$find_import <- TRUE
 config$outlier_threshold <- 0.05
@@ -133,7 +133,7 @@ config <- create_config(data = data,
 
 out <- outbreaker(data = data,config = config,priors = priors,
                   likelihoods = likelihoods,moves = moves)
-saveRDS(out, file = "with_import_005.rds")
+saveRDS(out, file = "fake_outbreak_runs/with_import_005.rds")
 
 data <- outbreaker_data(data = data,
                         import = dt_cases$import)
@@ -149,4 +149,4 @@ config <- create_config(data = data,
 
 out <- outbreaker(data = data,config = config,priors = priors,
                   likelihoods = likelihoods,moves = moves)
-saveRDS(out, file = "with_import_095.rds")
+saveRDS(out, file = "fake_outbreak_runs/with_import_095.rds")
