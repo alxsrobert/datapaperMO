@@ -2,7 +2,7 @@
 
 new_case <- function(sec, date_index, county_index, age_group_index, genotype_index, 
                      count, cluster, generation, dt_distance, 
-                     polymod_prop, w){
+                     polymod_prop, w, dt_state_county){
   county_k <- sample(dt_distance[county2 == county_index, county1], sec, 
                      prob = dt_distance[county2 == county_index, probs], 
                      replace = T)
@@ -33,8 +33,9 @@ new_case <- function(sec, date_index, county_index, age_group_index, genotype_in
 #### Generate dataset ####
 
 
-generate_dataset <- function(a, b, gamma, dt_distance, polymod_prop, w, nb_cases, 
-         r0_state, pop_county, t_min, t_max){
+generate_dataset <- function(a, b, gamma, dt_population, dt_distance, 
+                             polymod_prop, w, nb_cases, r0_state, pop_county, 
+                             t_min, t_max, dt_state_county){
   
   dt_distance[, nb_commut := pop_county1**a*exp(-distance_km*b)]
   dt_distance[distance_km > gamma, nb_commut := 0]
@@ -88,6 +89,7 @@ generate_dataset <- function(a, b, gamma, dt_distance, polymod_prop, w, nb_cases
                               genotype_index = genotype_i, count = count, 
                               cluster = clust_i, generation = gen_i, 
                               dt_distance = dt_distance,
+                              dt_state_county = dt_state_county,
                               polymod_prop = polymod_prop, w = w)
         dt_cases <- rbind(dt_cases, case_subs)
       }
@@ -112,6 +114,6 @@ generate_dataset <- function(a, b, gamma, dt_distance, polymod_prop, w, nb_cases
   vect_pop <- vect_pop[rownames(distance_matrix)]
   
   fake_outbreak <- list(cases = dt_cases, distance = distance_matrix,
-                        population = vect_pop, age_contact = polymod)
+                        population = vect_pop, age_contact = polymod_prop)
   return(fake_outbreak)
 }

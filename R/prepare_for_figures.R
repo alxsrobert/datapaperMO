@@ -1,4 +1,23 @@
-prepare_for_figures <- function(out, dt_cases){
+prepare_for_figures <- function(out, dt_cases, burnin, sample_every, max_clust,
+                                thresh_barplot, diff){
+  
+  names_barplot <- sapply(1:length(thresh_barplot), function(X){
+    if((X + 1) > length(thresh_barplot))
+      return(paste0(as.character(thresh_barplot[X]), "+"))
+    if(thresh_barplot[X+1] == (thresh_barplot[X] + 1))
+      return(as.character(thresh_barplot[X]))
+    else 
+      return(paste0(as.character(thresh_barplot[X]), "-",
+                    as.character(thresh_barplot[X+1] - 1)))
+  })
+  
+  groups_barplot <- sapply(1:max_clust, function(X){
+    return(max(which(thresh_barplot <= X)))
+  })
+  
+  
+  ref <- seq(diff/2, 1 - diff/2, diff)
+  missed <- ref
   
   clust_matrix <- t(apply(out[(burnin/sample_every):dim(out)[1],
                                   grep("alpha", colnames(out))], 1, function(X){
