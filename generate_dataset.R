@@ -13,8 +13,8 @@ new_case <- function(sec, date_index, county_index, age_group_index, genotype_in
   date_k <- date_index+sample(1:length(w), size = sec, prob = exp(w),
                               replace = T)
   
-  genotype_k <- sample(c("Not attributed", genotype_index), size = sec, 
-                       prob = c(0.60, 0.40), replace = T)
+  genotype_k <- rep(genotype_index, sec)
+  
   case_k <- data.table(as.character((count):(count + sec - 1)), 
                        dt_state_county[county_k, STNAME],
                        date_k, 
@@ -34,7 +34,7 @@ new_case <- function(sec, date_index, county_index, age_group_index, genotype_in
 
 
 generate_dataset <- function(a, b, gamma, dt_distance, polymod_prop, w, nb_cases, 
-         r0_state, pop_county){
+         r0_state, pop_county, t_min, t_max){
   
   dt_distance[, nb_commut := pop_county1**a*exp(-distance_km*b)]
   dt_distance[distance_km > gamma, nb_commut := 0]
@@ -48,7 +48,7 @@ generate_dataset <- function(a, b, gamma, dt_distance, polymod_prop, w, nb_cases
   i <- 1
   
   while(dim(dt_cases)[1] < nb_cases){
-    date_i <- sample(x = as.Date("2010-01-01"):as.Date("2016-01-01"), size = 1)
+    date_i <- sample(x = t_min:t_max, size = 1)
     date_i <- as.Date(date_i, origin = "1970-01-01")
     
     county_i <- sample(x =names(pop_county), size = 1, 
@@ -57,8 +57,10 @@ generate_dataset <- function(a, b, gamma, dt_distance, polymod_prop, w, nb_cases
     age_group_i <- ceiling(rexp(n = 1, rate = 0.2))
     if(age_group_i>dim(polymod_prop)[2]) age_group_i <- dim(polymod_prop)[2]
     
-    genotype_i <- sample(c("Not attributed", "D4", "B1", "B4", "D8"), size = 1, 
-                         prob = c(0.60, 0.20, 0.10, 0.05, 0.05))
+    genotype_i <- sample(c("B3", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "G3", "H1", "H2"),
+                         size = 1, 
+                         prob = c(0.36, 0.05, 0.10, 0.05, 0.01, 0.01, 0.25, 0.10, 
+                                  0.01, 0.05, 0.01))
     
     clust_i <- i
     gen <- 1
@@ -92,6 +94,9 @@ generate_dataset <- function(a, b, gamma, dt_distance, polymod_prop, w, nb_cases
     }
     i <- i + 1 
   }
+  
+  gen_reported <- runif(nrow(dt_cases), 0, 1)
+  dt_cases[gen_reported < 0.6, Genotype := "Not attributed"]
   
   dt_distance <- dt_distance[,.(county1, county2, distance_km)]
   
