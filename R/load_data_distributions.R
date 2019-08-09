@@ -1,12 +1,4 @@
-#### Libraries ####
-
-library(magrittr)
-library(dplyr)
-library(expm)
-library(devtools)
-library(Rcpp)
-library(data.table)
-library(geosphere)
+source("R/library_importation.R")
 
 #### Serial interval Measles ####
 
@@ -21,7 +13,8 @@ w <- dnorm(x = 1:300, mean = 11.7, sd = 2.0, log = T)
 
 #### Incubation period ####
 
-#From The correlation between infectivity and incubation period of measles, estimated from households with two cases
+#From "The correlation between infectivity and incubation period of measles, 
+# estimated from households with two cases"
 # Don Klinkenberg, Hiroshi Nishiura
 # mean = shape * scale = 11.5
 # variance = shape * scale**2 = 2.2**2
