@@ -35,10 +35,10 @@ if(generate){
 #### Analysis toy data ####
 
 
-dt_cases <- fake_outbreak[["cases"]]
-dist_mat <- fake_outbreak[["distance"]]
-pop_vect <- fake_outbreak[["population"]]
-age_contact <- fake_outbreak[["age_contact"]]
+dt_cases <- toy_outbreak[["cases"]]
+dist_mat <- toy_outbreak[["distance"]]
+pop_vect <- toy_outbreak[["population"]]
+age_contact <- toy_outbreak[["age_contact"]]
 
 dt_cases <- dt_cases[order(Date), ]
 
