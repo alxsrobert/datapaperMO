@@ -8,7 +8,6 @@ grid.newpage()
 pushViewport(viewport(layout = grid.layout(nrow = 2, ncol = 1)))
 
 dt_heatmap <- rbind(dt_heatmap_001, dt_heatmap_005, dt_heatmap_import)
-# dt_heatmap <- dt_heatmap_005
 
 pushViewport(viewport(layout.pos.row = 1))
 par(fig = gridFIG(),family = "sans",
