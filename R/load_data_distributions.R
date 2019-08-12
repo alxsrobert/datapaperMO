@@ -41,31 +41,40 @@ polymod_prop <- apply(polymod, 2, function(X)
 
 #### Distance Counties pop ####
 
+# Load excel file with population centroid in every US county
 dt_loca_pop_center <- as.data.table(read.csv(
   file = "data/pop_center.csv",
   stringsAsFactors = FALSE, colClasses = c("character", "character",
                                            "character","character",
                                            "numeric", "numeric",
                                            "numeric", "character")))
+# dt_state_county includes county ID and the state it belongs to
 dt_state_county <- dt_loca_pop_center[,.(ID_COUNTY, STNAME)]
 setkey(dt_state_county, ID_COUNTY)
+# Create empty data table to story distance between every UK county
 dt_distance_pop_center <- as.data.table(matrix(0, nrow = nrow(dt_loca_pop_center)**2,
                                                ncol = 9))
 colnames(dt_distance_pop_center) <- c("county1", "county2", "distance_km",
                                       "pop_county1", "long1", "lat1",
                                       "pop_county2", "long2", "lat2")
+# 1st column: county1
 dt_distance_pop_center[, county1 := as.character(county1)]
 dt_distance_pop_center[, county1 := rep(dt_loca_pop_center$ID_COUNTY, 
                                         nrow(dt_loca_pop_center))]
 setkey(dt_loca_pop_center, ID_COUNTY)
+# 5th column: long value of county1's population centroid
 dt_distance_pop_center[, long1 := dt_loca_pop_center[dt_distance_pop_center$county1,
                                                      LONGITUDE]]
+# 6th column: lat value of county1's population centroid
 dt_distance_pop_center[, lat1 := dt_loca_pop_center[dt_distance_pop_center$county1,
                                                     LATITUDE]]
+# 2nd column: county2
 dt_distance_pop_center[, county2 := rep(dt_loca_pop_center$ID_COUNTY,
                                         each = nrow(dt_loca_pop_center))]
+# 8th column: long value of county2's population centroid
 dt_distance_pop_center[, long2 := dt_loca_pop_center[dt_distance_pop_center$county2,
                                                      LONGITUDE]]
+# 9th column: lat value of county2's population centroid
 dt_distance_pop_center[, lat2 := dt_loca_pop_center[dt_distance_pop_center$county2,
                                                     LATITUDE]]
 long1 <- dt_distance_pop_center$long1
@@ -79,12 +88,15 @@ mat2 <- matrix(c(long2,
 rm(list = c("lat1", "lat2", "long1", "long2"))
 dist <- numeric(dim(dt_distance_pop_center)[1])
 gc()
+# Compute distance between every centroid
 dist <- distGeo(mat1, mat2)/1000
+# 3rd column: distance between counties
 dt_distance_pop_center[, distance_km := dist]
-
+# 4th column: population in county1
 dt_distance_pop_center[, pop_county1 := 
                          dt_loca_pop_center[dt_distance_pop_center$county1,
                                             POPULATION]]
+# 7th column: population in county2
 dt_distance_pop_center[, pop_county2 := 
                          dt_loca_pop_center[dt_distance_pop_center$county2,
                                             POPULATION]]
@@ -92,7 +104,7 @@ dt_distance <- dt_distance_pop_center
 
 rm(list = c("dist", "mat1", "mat2", "dt_distance_pop_center", "dt_loca_pop_center"))
 gc()
-
+# dt_population includes county ID and their population
 dt_population <- dt_distance[!duplicated(county1), .(county1, pop_county1)]
 colnames(dt_population) <- c("county", "population")
 
