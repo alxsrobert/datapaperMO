@@ -57,7 +57,7 @@ size_cluster_ref_singletons[1] <- size_cluster_ref_barplot[1]
 
 #### threshold 001 ####
 
-out <- readRDS(file = "fake_outbreak_runs/no_import_thresh001.rds")
+out <- readRDS(file = "toy_outbreak_runs/no_import_thresh001.rds")
 fig_001 <- prepare_for_figures(out = out, 
                                dt_cases = dt_cases, burnin = burnin, 
                                sample_every = sample_every, 
@@ -79,7 +79,7 @@ factor_import_001 <- fig_001[["factor_import"]]
 
 #### threshold 005 ####
 
-out <- readRDS(file = "fake_outbreak_runs/no_import_thresh005.rds")
+out <- readRDS(file = "toy_outbreak_runs/no_import_thresh005.rds")
 
 fig_005 <- prepare_for_figures(out = out, 
                                dt_cases = dt_cases, burnin = burnin, 
@@ -101,7 +101,7 @@ factor_import_005 <- fig_005[["factor_import"]]
 
 #### threshold 09 ####
 
-out <- readRDS(file = "fake_outbreak_runs/no_import_thresh09.rds")
+out <- readRDS(file = "toy_outbreak_runs/no_import_thresh09.rds")
 
 fig_09 <- prepare_for_figures(out = out, 
                               dt_cases = dt_cases, burnin = burnin, 
@@ -123,7 +123,7 @@ factor_import_09 <- fig_09[["factor_import"]]
 
 #### threshold 095 ####
 
-out <- readRDS(file = "fake_outbreak_runs/no_import_thresh095.rds")
+out <- readRDS(file = "toy_outbreak_runs/no_import_thresh095.rds")
 
 fig_095 <- prepare_for_figures(out = out, 
                                dt_cases = dt_cases, burnin = burnin, 
@@ -145,7 +145,7 @@ factor_import_095 <- fig_095[["factor_import"]]
 
 #### with imports ####
 
-out <- readRDS(file = "fake_outbreak_runs/with_import.rds")
+out <- readRDS(file = "toy_outbreak_runs/with_import.rds")
 
 fig_import <- prepare_for_figures(out = out, 
                                   dt_cases = dt_cases, burnin = burnin, 
@@ -167,7 +167,7 @@ factor_import_imports <- fig_import[["factor_import"]]
 
 #### with imports 005 ####
 
-out <- readRDS(file = "fake_outbreak_runs/with_import_005.rds")
+out <- readRDS(file = "toy_outbreak_runs/with_import_005.rds")
 
 fig_005_wi <- prepare_for_figures(out = out, 
                                   dt_cases = dt_cases, burnin = burnin, 
@@ -190,7 +190,7 @@ factor_import_005_wi <- fig_005_wi[["factor_import"]]
 
 #### with imports 095 ####
 
-out <- readRDS(file = "fake_outbreak_runs/with_import_095.rds")
+out <- readRDS(file = "toy_outbreak_runs/with_import_095.rds")
 
 fig_095_wi <- prepare_for_figures(out = out, 
                                   dt_cases = dt_cases, burnin = burnin, 

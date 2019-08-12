@@ -113,7 +113,7 @@ generate_dataset <- function(a, b, gamma, dt_population, dt_distance,
   names(vect_pop) <- dt_population$county
   vect_pop <- vect_pop[rownames(distance_matrix)]
   
-  fake_outbreak <- list(cases = dt_cases, distance = distance_matrix,
+  toy_outbreak <- list(cases = dt_cases, distance = distance_matrix,
                         population = vect_pop, age_contact = polymod_prop)
-  return(fake_outbreak)
+  return(toy_outbreak)
 }
