@@ -47,7 +47,7 @@ generate_figure_3_4 <- function(med_size_cluster,
   # nb_clust_ref <- length(unique(dt_cases$cluster))
   # names(nb_clust_ref) <- "Imports"
   
-  b <- barplot(cbind(med_imports[,1], med_size_cluster[, 1]),
+  b <- barplot(cbind(imports = med_imports[,1], singletons = med_size_cluster[, 1]),
                col = grey.colors(nrow(med_size_cluster)),
                beside = T,
                ylim = c(0, max(cbind(up_imports[,1], up_size_cluster[, 1]))), 
