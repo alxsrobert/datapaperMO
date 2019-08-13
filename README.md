@@ -1,6 +1,14 @@
 # datapaperMO
 analysis of fake_outbreak dataset from the measlesoutbreaker package
 
+install package measlesoutbreaker from "alxsrobert/measlesoutbreaker"
+```R
+install.packages("devtools")
+library(devtools)
+install.github("alxsrobert/measlesoutbreaker")
+library(measlesoutbreaker)
+```
+
 In data: 
 - State_initials.csv	: Data table with state names and acronyms.
 - pop_center.csv: Population centroid and population of every county (Source: https://www.census.gov/geographies/reference-files/2010/geo/2010-centers-population.html (per state : UNITED STATES)).
