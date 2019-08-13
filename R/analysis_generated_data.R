@@ -22,7 +22,6 @@ if(generate){
   
   toy_outbreak <- generate_dataset(a = a, b = b, gamma = gamma, 
                                    dt_distance = dt_distance,
-                                   dt_population = dt_population,
                                    polymod_prop = polymod_prop, w = w, 
                                    nb_cases = nb_cases, r0_state = r0_state, 
                                    pop_county = pop_county, 
