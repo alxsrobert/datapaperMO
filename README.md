@@ -14,3 +14,6 @@ In src:
 - function_generate_figures_main.R: function to generate figures similar to figure 3, 4 and 5
 - analysis_generated_data.R: Script to run measlesoutbreaker on toy_outbreak  
 - load_analysis_for_figure.R: Script to analyse the output of measlesoutbreaker runs
+
+Use analysis_generated_data.R to generate the scripts in toy_outbreak_runs/
+Use load_analysis_for_figure to generate figure 3, 4 and 5
