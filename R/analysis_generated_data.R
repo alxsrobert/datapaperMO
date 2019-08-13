@@ -182,6 +182,7 @@ config <- create_config(data = data,
                         outlier_relative = FALSE,
                         move_a = FALSE,
                         move_b = FALSE,
+                        move_pi = FALSE,
                         move_t_inf = FALSE,
                         move_kappa = FALSE)
 priors <- custom_priors()
@@ -198,7 +199,7 @@ saveRDS(out, file = "toy_outbreak_runs/import_no_like.rds")
 ## Import, time only
 data$w_dens = matrix(exp(w), nrow = 1)
 data$a_dens = matrix(polymod_prop, nrow = nrow(polymod_prop))
-data <- outbreaker_data(data)
+data <- outbreaker_data(data = data)
 likelihoods <- custom_likelihoods(space = f_null, 
                                   age = f_null)
 config$move_t_inf <- TRUE
