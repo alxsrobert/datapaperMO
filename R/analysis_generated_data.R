@@ -183,7 +183,8 @@ config <- create_config(data = data,
                         move_b = FALSE,
                         move_pi = FALSE,
                         move_t_inf = FALSE,
-                        move_kappa = FALSE)
+                        move_kappa = FALSE,
+                        move_swap_cases = FALSE)
 priors <- custom_priors()
 likelihoods <- custom_likelihoods(space = f_null, 
                                   timing_infections = f_null,
@@ -201,8 +202,10 @@ data$a_dens = matrix(polymod_prop, nrow = nrow(polymod_prop))
 data <- outbreaker_data(data = data)
 likelihoods <- custom_likelihoods(space = f_null, 
                                   age = f_null)
+config$delta <- 30
 config$move_t_inf <- TRUE
 config$move_kappa <- TRUE
+config$move_swap_cases <- TRUE
 config <- create_config(data = data,
                         config)
 moves <- custom_moves()
@@ -226,6 +229,8 @@ saveRDS(out, file = paste0("toy_outbreak_runs/import_time_genotype.rds"))
 likelihoods <- custom_likelihoods(age = f_null)
 config$move_a <- TRUE
 config$move_b <- TRUE
+config$gamma <- 100
+
 config <- create_config(data = data,
                         config)
 out <- outbreaker(data = data,config = config,priors = priors,
@@ -236,6 +241,7 @@ saveRDS(out, file = paste0("toy_outbreak_runs/import_time_genotype_space.rds"))
 ## Import, time, genotype and age
 config$move_a <- FALSE
 config$move_b <- FALSE
+config$gamma <- NULL
 config <- create_config(data = data,
                         config)
 likelihoods <- custom_likelihoods(space = f_null)
