@@ -84,7 +84,7 @@ generate_figure_3_4 <- function(med_size_cluster, up_size_cluster,
   ## dt_heatmap merges the data table contained in list_heatmap
   dt_heatmap <- bind_rows(list_heatmap)
   # Generate the heatmaps
-  p <- ggplot(dt_heatmap, aes(ref, missed)) + 
+  p <- ggplot(dt_heatmap, aes(sensitivity, precision)) + 
     geom_tile(aes(fill = prop)) + 
     facet_grid(.~type) + 
     scale_fill_gradient2(na.value = "lightgrey",
@@ -94,9 +94,12 @@ generate_figure_3_4 <- function(med_size_cluster, up_size_cluster,
                          trans = "log", breaks = c(0,0.01, 0.1,0.5),
                          name = "Proportion 
 of cases")
-  p <- p + theme_classic() + labs(x = "Proportion of epi cluster in inferred cluster",
-                                  y = "Proportion of inferred cluster not in epi cluster
-(False positives)") +
+  p <- p + theme_classic() + 
+#     labs(x = "Proportion of epi cluster in inferred cluster",
+#          y = "Proportion of inferred cluster not in epi cluster
+# (False positives)") + 
+    labs(x = "Sensitivity",
+         y = "Precision") +
     theme(axis.ticks = element_blank(), 
           axis.title = element_text(size = rel(1.4)),
           legend.text = element_text(size = rel(1.2)), 
