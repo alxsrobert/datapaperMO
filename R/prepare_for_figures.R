@@ -33,8 +33,8 @@ prepare_for_figures <- function(out, dt_cases, burnin, sample_every, max_clust,
   })
   
   
-  ref <- seq(diff/2, 1 - diff/2, diff)
-  missed <- ref
+  sensitivity <- seq(diff/2, 1 - diff/2, diff)
+  precision <- ref
   
   clust_matrix <- t(apply(out[(burnin/sample_every):dim(out)[1],
                                   grep("alpha", colnames(out))], 1, function(X){
@@ -152,44 +152,79 @@ prepare_for_figures <- function(out, dt_cases, burnin, sample_every, max_clust,
                                  function(X) quantile(X, 0.975))
   
   dt_prop <- cbind.data.frame(case = not_singletons, 
-                              ref = med_clust_in_inferred, 
-                              missed = med_inferred_in_clust)
-  dt_heatmap <- cbind(ref = rep(ref, length(missed)),
-                      missed = rep(missed, each = length(ref)))
+                              sensitivity = med_clust_in_inferred, 
+                              precision = 1 - med_inferred_in_clust)
+  dt_heatmap <- cbind(sensitivity = rep(sensitivity, length(precision)),
+                      precision = rep(precision, each = length(sensitivity)))
   dt_heatmap <- as.data.table(dt_heatmap)
   dt_heatmap$number <- apply(dt_heatmap, 1, function(X){
-    if(X["ref"] == 1-diff/2){
-      return(length(which(dt_prop$ref>=X["ref"]-diff/2 & 
-                            dt_prop$ref<=X["ref"]+diff/2 &
-                            dt_prop$missed>=X["missed"]-diff/2 & 
-                            dt_prop$missed<X["missed"]+diff/2)))    
+    if(X["sensitivity"] == 1-diff/2){
+      return(length(which(dt_prop$sensitivity>=X["sensitivity"]-diff/2 & 
+                            dt_prop$sensitivity<=X["sensitivity"]+diff/2 &
+                            dt_prop$precision>=X["precision"]-diff/2 & 
+                            dt_prop$precision<X["precision"]+diff/2)))    
     }
-    if(X["missed"] == 1-diff/2){
-      return(length(which(dt_prop$ref>=X["ref"]-diff/2 & 
-                            dt_prop$ref<X["ref"]+diff/2 &
-                            dt_prop$missed>=X["missed"]-diff/2 & 
-                            dt_prop$missed<=X["missed"]+diff/2)))    
+    if(X["precision"] == 1-diff/2){
+      return(length(which(dt_prop$sensitivity>=X["sensitivity"]-diff/2 & 
+                            dt_prop$sensitivity<X["sensitivity"]+diff/2 &
+                            dt_prop$precision>=X["precision"]-diff/2 & 
+                            dt_prop$precision<=X["precision"]+diff/2)))    
     }
-    return(length(which(dt_prop$ref>=X["ref"]-diff/2 & 
-                          dt_prop$ref<X["ref"]+diff/2 &
-                          dt_prop$missed>=X["missed"]-diff/2 &
-                          dt_prop$missed<X["missed"]+diff/2)))
+    return(length(which(dt_prop$sensitivity>=X["sensitivity"]-diff/2 & 
+                          dt_prop$sensitivity<X["sensitivity"]+diff/2 &
+                          dt_prop$precision>=X["precision"]-diff/2 &
+                          dt_prop$precision<X["precision"]+diff/2)))
   })
   dt_heatmap$prop <- dt_heatmap$number/sum(dt_heatmap$number)
-  # y_max <- max(dt_heatmap[prop>0, missed])
-  # x_max <- max(dt_heatmap[prop>0, ref])
-  # dt_heatmap <- dt_heatmap[missed <= y_max & ref <= x_max,]
+  # y_max <- max(dt_heatmap[prop>0, precision])
+  # x_max <- max(dt_heatmap[prop>0, sensitivity])
+  # dt_heatmap <- dt_heatmap[precision <= y_max & sensitivity <= x_max,]
 
   factor_import <- case_state(clust_matrix, dt_cases)
+  
+  
+  clust_transmission <- t(apply(out[(burnin/sample_every):dim(out)[1],
+                                    grep("alpha", colnames(out))], 1, function(X){
+                                      X[!is.na(X)] <- names(X[X[!is.na(X)]])
+                                      X[is.na(X)] <- names(X[is.na(X)])
+                                      return(X)
+                                    }))
+  transmission_distance <- t(apply(clust_transmission, 1, function(X){
+    X <- X[X != names(X)]
+    X <- gsub(pattern = "alpha_", replacement = "", X)
+    names(X) <- gsub(pattern = "alpha_", replacement = "", names(X))
+    dist <- dt_distance[paste0(dt_us_cases[as.numeric(X), INCITS], 
+                               "_", dt_us_cases[as.numeric(names(X)), INCITS]),dist]
+    h <- hist(dist, breaks = c(0, 10, 20, 50, 100), plot = F)
+    trans_dist <- h$counts
+    names(trans_dist) <- c("0-10", "10-20", "20-50", "50-100")
+    return(trans_dist/sum(trans_dist))
+  }))
+  med_dist <- apply(transmission_distance, 2, median)
+  low_dist <- apply(transmission_distance, 2, function(X) 
+    return(quantile(x = X, probs = 0.025)))
+  up_dist <- apply(transmission_distance, 2, function(X) 
+    return(quantile(x = X, probs = 0.975)))
+  
   
   return(list(low_size_cluster_barplot = low_size_cluster_barplot,
               med_size_cluster_barplot = med_size_cluster_barplot,
               up_size_cluster_barplot = up_size_cluster_barplot,
+              
               med_prop_singletons = med_prop_singletons,
-              low = low,
-              med = med,
-              up = up,
-              dt_heatmap = dt_heatmap, 
-              factor_import = factor_import))
+              
+              low = low, med = med, up = up,
+              
+              dt_heatmap = dt_heatmap, factor_import = factor_import,
+              
+              med_sensitivity =  med_clust_in_inferred,
+              low_sensitivity = low_clust_in_inferred,
+              up_sensitivity = up_clust_in_inferred,
+              
+              med_precision = 1 - med_inferred_in_clust,
+              low_precision = 1 - low_inferred_in_clust,
+              up_precision = 1 - up_inferred_in_clust, 
+              
+              med_dist = med_dist, low_dist = low_dist, up_dist = up_dist))
   
 }
