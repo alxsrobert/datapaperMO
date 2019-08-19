@@ -34,7 +34,7 @@ prepare_for_figures <- function(out, dt_cases, burnin, sample_every, max_clust,
   
   
   sensitivity <- seq(diff/2, 1 - diff/2, diff)
-  precision <- ref
+  precision <- sensitivity
   
   clust_matrix <- t(apply(out[(burnin/sample_every):dim(out)[1],
                                   grep("alpha", colnames(out))], 1, function(X){
