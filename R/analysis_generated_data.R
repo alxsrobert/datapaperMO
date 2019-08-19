@@ -138,9 +138,7 @@ data <- outbreaker_data(data = data,
 config$outlier_threshold <- 0.95
 config$outlier_relative <- TRUE
 config <- create_config(data = data, 
-                        config = config,
-                        outlier_threshold = 0.95, 
-                        outlier_relative = TRUE)
+                        config = config)
 
 
 out <- outbreaker(data = data,config = config,priors = priors,
