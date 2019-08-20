@@ -114,6 +114,13 @@ fig_095_wi <- prepare_for_figures(out = out,
                                   sample_every = sample_every, 
                                   max_clust = max_clust,
                                   thresh_barplot = thresh_barplot, diff = diff)
+## no_like
+out <- readRDS(file = "toy_outbreak_runs/import_no_like.rds")
+fig_no_lik <- prepare_for_figures(out = out, 
+                                  dt_cases = dt_cases, burnin = burnin, 
+                                  sample_every = sample_every, 
+                                  max_clust = max_clust,
+                                  thresh_barplot = thresh_barplot, diff = diff)
 
 #### Generate figure ####
 
@@ -125,75 +132,11 @@ fig_095[["dt_heatmap"]][, type := "095"]
 fig_import[["dt_heatmap"]][, type := "import"]
 fig_005_wi[["dt_heatmap"]][, type := "005_wi"]
 
-## List of all heatmaps in data
-list_heatmap <- list(#fig_001[["dt_heatmap"]],
-                     fig_005[["dt_heatmap"]],
-                     # fig_09[["dt_heatmap"]],
-                     # fig_095[["dt_heatmap"]], 
-                     # fig_import[["dt_heatmap"]],
-                     fig_005_wi[["dt_heatmap"]]
-                     )
-## Median values of cluster size distributions
-med_size_cluster <- rbind(fig_001[["med_size_cluster_barplot"]],
-                          fig_005[["med_size_cluster_barplot"]],
-                          fig_09[["med_size_cluster_barplot"]],
-                          fig_095[["med_size_cluster_barplot"]],
-                          fig_import[["med_size_cluster_barplot"]],
-                          fig_005_wi[["med_size_cluster_barplot"]],
-                          size_cluster_ref_barplot)
-## 97.5% CI
-up_size_cluster <- rbind(fig_001[["up_size_cluster_barplot"]],
-                         fig_005[["up_size_cluster_barplot"]],
-                         fig_09[["up_size_cluster_barplot"]],
-                         fig_095[["up_size_cluster_barplot"]],
-                         fig_import[["up_size_cluster_barplot"]],
-                         fig_005_wi[["up_size_cluster_barplot"]])
-## 2.5% CI
-low_size_cluster <- rbind(fig_001[["low_size_cluster_barplot"]],
-                          fig_005[["low_size_cluster_barplot"]],
-                          fig_09[["low_size_cluster_barplot"]],
-                          fig_095[["low_size_cluster_barplot"]],
-                          fig_import[["low_size_cluster_barplot"]],
-                          fig_005_wi[["low_size_cluster_barplot"]])
-## Number of singletons
-singletons <- rbind(fig_001[["med_prop_singletons"]],
-                    fig_005[["med_prop_singletons"]],
-                    fig_09[["med_prop_singletons"]],
-                    fig_095[["med_prop_singletons"]],
-                    fig_import[["med_prop_singletons"]],
-                    fig_005_wi[["med_prop_singletons"]],
-                    size_cluster_ref_singletons)
-## Median number of imports, and number of imports correctly inferred
-med_imports<- rbind(fig_001[["med"]], 
-                    fig_005[["med"]], 
-                    fig_09[["med"]], 
-                    fig_095[["med"]], 
-                    fig_import[["med"]], 
-                    fig_005_wi[["med"]],
-                    size_cluster_ref_barplot %>% sum)
-## 97.5% CI
-up_imports<- rbind(fig_001[["up"]],
-                   fig_005[["up"]],
-                   fig_09[["up"]],
-                   fig_095[["up"]],
-                   fig_import[["up"]],
-                   fig_005_wi[["up"]])
-## 2.5% CI
-low_imports<- rbind(fig_001[["low"]],
-                    fig_005[["low"]],
-                    fig_09[["low"]],
-                    fig_095[["low"]],
-                    fig_import[["low"]],
-                    fig_005_wi[["low"]])
 ## Call function to generate figures 3 and 4
-generate_figure_3_4(med_size_cluster,
-                    up_size_cluster,
-                    low_size_cluster,
-                    singletons,
-                    med_imports,
-                    up_imports,
-                    low_imports,
-                    list_heatmap)
+fig_hist_list <- list(fig_001, fig_005, fig_09, fig_095, fig_import, fig_005_wi)
+list_fig_heatmap <- list(fig_import, fig_005_wi)
+generate_figure_3_4(fig_hist_list, list_fig_heatmap)
+
 
 ## Subsequent cases / number of imports in each state at every iteration
 list_factor_import <- list(fig_005[["factor_import"]], 
