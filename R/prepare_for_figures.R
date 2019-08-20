@@ -176,35 +176,8 @@ prepare_for_figures <- function(out, dt_cases, burnin, sample_every, max_clust,
                           dt_prop$precision<X["precision"]+diff/2)))
   })
   dt_heatmap$prop <- dt_heatmap$number/sum(dt_heatmap$number)
-  # y_max <- max(dt_heatmap[prop>0, precision])
-  # x_max <- max(dt_heatmap[prop>0, sensitivity])
-  # dt_heatmap <- dt_heatmap[precision <= y_max & sensitivity <= x_max,]
 
   factor_import <- case_state(clust_matrix, dt_cases)
-  
-  
-  clust_transmission <- t(apply(out[(burnin/sample_every):dim(out)[1],
-                                    grep("alpha", colnames(out))], 1, function(X){
-                                      X[!is.na(X)] <- names(X[X[!is.na(X)]])
-                                      X[is.na(X)] <- names(X[is.na(X)])
-                                      return(X)
-                                    }))
-  transmission_distance <- t(apply(clust_transmission, 1, function(X){
-    X <- X[X != names(X)]
-    X <- gsub(pattern = "alpha_", replacement = "", X)
-    names(X) <- gsub(pattern = "alpha_", replacement = "", names(X))
-    dist <- dt_distance[paste0(dt_us_cases[as.numeric(X), INCITS], 
-                               "_", dt_us_cases[as.numeric(names(X)), INCITS]),dist]
-    h <- hist(dist, breaks = c(0, 10, 20, 50, 100), plot = F)
-    trans_dist <- h$counts
-    names(trans_dist) <- c("0-10", "10-20", "20-50", "50-100")
-    return(trans_dist/sum(trans_dist))
-  }))
-  med_dist <- apply(transmission_distance, 2, median)
-  low_dist <- apply(transmission_distance, 2, function(X) 
-    return(quantile(x = X, probs = 0.025)))
-  up_dist <- apply(transmission_distance, 2, function(X) 
-    return(quantile(x = X, probs = 0.975)))
   
   
   return(list(low_size_cluster_barplot = low_size_cluster_barplot,
@@ -223,8 +196,6 @@ prepare_for_figures <- function(out, dt_cases, burnin, sample_every, max_clust,
               
               med_precision = 1 - med_inferred_in_clust,
               low_precision = 1 - low_inferred_in_clust,
-              up_precision = 1 - up_inferred_in_clust, 
-              
-              med_dist = med_dist, low_dist = low_dist, up_dist = up_dist))
+              up_precision = 1 - up_inferred_in_clust))
   
 }
