@@ -1,5 +1,13 @@
+transp <- function(col, alpha=.5){
+  res <- apply(col2rgb(col),2, function(c) 
+    rgb(c[1]/255, c[2]/255, c[3]/255, alpha))
+  return(res)
+}
+
 supp_fig_eval_cluster <- function(list_fig){
-  par(mfrow = c(length(list_fig),2))
+  par(mfrow = c(length(list_fig),2), omi = c(0.2,0.25,0,0), cex.lab = 1.4, 
+      cex.axis = 1.2, mar = c(1,1,1,-1)+ 1.1, las=1, bty="l", tcl=-1, lwd=2,
+      mgp = c(3, 1, 0))
   lapply(list_fig, function(X){
     low_sens <- X$low_sensitivity[order(X$med_sensitivity)]
     up_sens <- X$up_sensitivity[order(X$med_sensitivity)]
@@ -26,18 +34,18 @@ supp_fig_eval_cluster <- function(list_fig){
   })
 }
 
-supp_estim_params <- function(out){
-  pi = out$pi
+estim_params <- function(out, burnin, sample_every){
+  pi = out[(burnin/sample_every):dim(out)[1], "pi"]
   med_pi <- median(pi)
   up_pi <- quantile(pi, 0.975) %>% as.numeric
   low_pi <- quantile(pi, 0.025) %>% as.numeric
   
-  a = out$a
+  a = out[(burnin/sample_every):dim(out)[1], "a"]
   med_a <- median(a)
   up_a <- quantile(a, 0.975) %>% as.numeric
   low_a <- quantile(a, 0.025) %>% as.numeric
   
-  b = out$b
+  b = out[(burnin/sample_every):dim(out)[1], "b"]
   med_b <- median(b)
   up_b <- quantile(b, 0.975) %>% as.numeric
   low_b <- quantile(b, 0.025) %>% as.numeric
@@ -47,9 +55,10 @@ supp_estim_params <- function(out){
            b = med_b, b_low = low_b, b_up = up_b))
 }
 
-supp_fig_param_estimate <- function(list_out){
-  output <- do.call(rbind,lapply(list_out, estim_params))
-  
+supp_fig_param_estimate <- function(list_out, burnin, sample_every){
+  output <- do.call(rbind,lapply(list_out, function(X)
+    return(estim_params(X, burnin, sample_every))))
+
   par(fig = c(0, 1, 0.68, 1), family = "sans", omi = c(0,0,0,0), cex.lab = 1.4,
       cex.axis = 1.2, mar = c(0,4,-0.5,1)+ 1.1, las=1, bty="l", tcl=-1, lwd=2,
       mgp = c(3.5, 1, 0))
@@ -262,7 +271,7 @@ supp_fig_sec_map <- function(list_out, dt_cases){
       dt_test <- dt_test[, lapply(.SD, sum), by = State]
       nb_sec <- dt_test$sec
       names(nb_sec) <- dt_test$State
-      nb_sec <- nb_sec[names(table(dt_us_cases$State))]/table(dt_us_cases$State)
+      nb_sec <- nb_sec[names(table(dt_cases$State))]/table(dt_cases$State)
       
       return(nb_sec)
     }))
@@ -304,7 +313,8 @@ supp_fig_sec_map <- function(list_out, dt_cases){
   p
 }
 
-supp_fig_distance_transmission <- function(list_out, burnin, sample_every, dt_distance){
+supp_fig_distance_transmission <- function(list_out, burnin, sample_every, dt_cases,
+                                           dt_distance){
   dt_distance[, id_dist := paste0(county1, "_", county2)]
   setkey(dt_distance, id_dist)
   
@@ -319,8 +329,8 @@ supp_fig_distance_transmission <- function(list_out, burnin, sample_every, dt_di
       X <- X[X != names(X)]
       X <- gsub(pattern = "alpha_", replacement = "", X)
       names(X) <- gsub(pattern = "alpha_", replacement = "", names(X))
-      dist <- dt_distance[paste0(dt_us_cases[as.numeric(X), INCITS], 
-                                 "_", dt_us_cases[as.numeric(names(X)), INCITS]),dist]
+      dist <- dt_distance[paste0(dt_cases[as.numeric(X), INCITS], 
+                                 "_", dt_cases[as.numeric(names(X)), INCITS]),dist]
       h <- hist(dist, breaks = c(0, 10, 20, 50, 100), plot = F)
       trans_dist <- h$counts
       names(trans_dist) <- c("0-10", "10-20", "20-50", "50-100")
