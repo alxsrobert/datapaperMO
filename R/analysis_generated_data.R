@@ -209,13 +209,12 @@ config <- create_config(data = data,
 moves <- custom_moves()
 out <- outbreaker(data = data,config = config,priors = priors,
                   likelihoods = likelihoods,moves = moves)
-print(end-start)
 
 saveRDS(out, file = paste0("toy_outbreak_runs/import_time_only.rds"))
 
 ## Import, time and genotype
 data$genotype <- dt_cases$Genotype
-data <- outbreaker_data(data)
+data <- outbreaker_data(data = data)
 config <- create_config(data = data,
                         config)
 out <- outbreaker(data = data,config = config,priors = priors,
