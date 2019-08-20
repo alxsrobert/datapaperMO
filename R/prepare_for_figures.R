@@ -1,3 +1,12 @@
+#' Title
+#'
+#' @param clust_matrix 
+#' @param dt_cases 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 case_state <- function(clust_matrix, dt_cases){
   clust_matrix_nb <- gsub(pattern = "alpha_", 
                           replacement = "", 
@@ -15,8 +24,35 @@ case_state <- function(clust_matrix, dt_cases){
 }
 
 
-prepare_for_figures <- function(out, dt_cases, burnin, sample_every, max_clust,
-                                thresh_barplot, diff){
+#' Title
+#'
+#' @param X 
+#'
+#' @return
+#' @param med_size_cluster List containing the Median values of cluster size 
+#' distributions in each run or data included in the histogram.
+#' @param up_size_cluster List containing the 97.5% quantile of cluster size 
+#' distributions in each run or data included in the histogram.
+#' @param low_size_cluster List containing the 2.5% quantile of cluster size 
+#' distributions in each run or data included in the histogram.
+#' @param singletons List containing the 97.5% quantile of cluster size 
+#' distributions in each run or data included in the histogram.
+#' @param med_imports List containing the median number of imports, and the
+#' number of imports correctly inferred in each run or data included in the
+#' histogram.
+#' @param up_imports List containing the 97.5% quantile of the number of imports, 
+#' and the number of imports correctly inferred in each run or data included in 
+#' the histogram.
+#' @param low_imports List containing the 97.5% quantile of the number of imports, 
+#' and the number of imports correctly inferred in each run or data included in the
+#' histogram.
+#' @param list_heatmap List containing the heatmap data tables for each run.
+#' 
+#' @export
+#'
+#' @examples
+prepare_for_figures <- function(out, dt_cases, burnin, sample_every, 
+                                max_clust, thresh_barplot, diff){
   
   names_barplot <- sapply(1:length(thresh_barplot), function(X){
     if((X + 1) > length(thresh_barplot))
@@ -37,15 +73,16 @@ prepare_for_figures <- function(out, dt_cases, burnin, sample_every, max_clust,
   precision <- sensitivity
   
   clust_matrix <- t(apply(out[(burnin/sample_every):dim(out)[1],
-                                  grep("alpha", colnames(out))], 1, function(X){
-                                    while(any(!is.na(X[X]))){
-                                      X[!is.na(X[X])] <- X[X[!is.na(X[X])]]
-                                      
-                                    }
-                                    X[!is.na(X)] <- names(X[X[!is.na(X)]])
-                                    X[is.na(X)] <- names(X[is.na(X)])
-                                    return(X)
-                                  }))
+                                  grep("alpha", colnames(out))], 1, 
+                          function(X){
+                            while(any(!is.na(X[X]))){
+                              X[!is.na(X[X])] <- X[X[!is.na(X[X])]]
+                              
+                            }
+                            X[!is.na(X)] <- names(X[X[!is.na(X)]])
+                            X[is.na(X)] <- names(X[is.na(X)])
+                            return(X)
+                          }))
   table_tot <- t(apply(clust_matrix, 1, function(X){
     table_clust <- numeric(max_clust)
     names(table_clust) <- 1:max_clust
@@ -158,22 +195,30 @@ prepare_for_figures <- function(out, dt_cases, burnin, sample_every, max_clust,
                       precision = rep(precision, each = length(sensitivity)))
   dt_heatmap <- as.data.table(dt_heatmap)
   dt_heatmap$number <- apply(dt_heatmap, 1, function(X){
-    if(X["sensitivity"] == 1-diff/2){
-      return(length(which(dt_prop$sensitivity>=X["sensitivity"]-diff/2 & 
-                            dt_prop$sensitivity<=X["sensitivity"]+diff/2 &
-                            dt_prop$precision>=X["precision"]-diff/2 & 
-                            dt_prop$precision<X["precision"]+diff/2)))    
+    min_sens <- X["sensitivity"]-diff/2
+    max_sens <- X["sensitivity"]+diff/2
+    min_prec <- X["precision"]-diff/2
+    max_prec <- X["precision"]+diff/2
+    
+    if(max_sens == 1 & max_prec == 1){
+      return(length(which(dt_prop$sensitivity >= min_sens & 
+                            dt_prop$precision >= min_prec)))
+    } else{
+      if(max_sens == 1){
+        return(length(which(dt_prop$sensitivity >= min_sens & 
+                              dt_prop$precision >= min_prec & 
+                              dt_prop$precision < max_prec)))
+      } 
+      if(max_prec == 1){
+        return(length(which(dt_prop$sensitivity >= min_sens & 
+                              dt_prop$sensitivity < max_sens &
+                              dt_prop$precision >= min_prec)))
+      } 
     }
-    if(X["precision"] == 1-diff/2){
-      return(length(which(dt_prop$sensitivity>=X["sensitivity"]-diff/2 & 
-                            dt_prop$sensitivity<X["sensitivity"]+diff/2 &
-                            dt_prop$precision>=X["precision"]-diff/2 & 
-                            dt_prop$precision<=X["precision"]+diff/2)))    
-    }
-    return(length(which(dt_prop$sensitivity>=X["sensitivity"]-diff/2 & 
-                          dt_prop$sensitivity<X["sensitivity"]+diff/2 &
-                          dt_prop$precision>=X["precision"]-diff/2 &
-                          dt_prop$precision<X["precision"]+diff/2)))
+    return(length(which(dt_prop$sensitivity >= min_sens & 
+                          dt_prop$sensitivity < max_sens &
+                          dt_prop$precision >= min_prec &
+                          dt_prop$precision < max_prec)))
   })
   dt_heatmap$prop <- dt_heatmap$number/sum(dt_heatmap$number)
 
