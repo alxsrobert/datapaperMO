@@ -1,30 +1,63 @@
 #' Title: Generate Figure 3 / 4
 #'
-#' @param med_size_cluster List containing the Median values of cluster size 
-#' distributions in each run or data included in the histogram.
-#' @param up_size_cluster List containing the 97.5% quantile of cluster size 
-#' distributions in each run or data included in the histogram.
-#' @param low_size_cluster List containing the 2.5% quantile of cluster size 
-#' distributions in each run or data included in the histogram.
-#' @param singletons List containing the 97.5% quantile of cluster size 
-#' distributions in each run or data included in the histogram.
-#' @param med_imports List containing the median number of imports, and the
-#' number of imports correctly inferred in each run or data included in the
-#' histogram.
-#' @param up_imports List containing the 97.5% quantile of the number of imports, 
-#' and the number of imports correctly inferred in each run or data included in 
-#' the histogram.
-#' @param low_imports List containing the 97.5% quantile of the number of imports, 
-#' and the number of imports correctly inferred in each run or data included in the
-#' histogram.
-#' @param list_heatmap List containing the heatmap data tables for each run.
+#'
+#' @param fig_hist_list list of output list for prepare_for_figure(), for every
+#' scenario to be displayed on the histogram
+#' @param list_fig_heatmap list of output list for prepare_for_figure(), for every
+#' scenario to be displayed on the heatmaps
 #'
 #' @export
 #'
 #' @examples
-generate_figure_3_4 <- function(med_size_cluster, up_size_cluster, 
-                                low_size_cluster, singletons, med_imports,
-                                up_imports, low_imports,list_heatmap){
+generate_figure_3_4 <- function(fig_hist_list, list_fig_heatmap){
+  ## Median values of cluster size distributions
+  med_size_cluster_list <- lapply(fig_hist_list,
+                                  function(X)
+                                    if(!is.null(X$med_size_cluster_barplot))
+                                      return(as.data.frame(t(X$med_size_cluster_barplot))))
+  med_size_cluster <- bind_rows(med_size_cluster_list) %>% as.matrix
+  ## 97.5% CI
+  up_size_cluster_list <- lapply(fig_hist_list,
+                                  function(X)
+                                    if(!is.null(X$up_size_cluster_barplot))
+                                    return(as.data.frame(t(X$up_size_cluster_barplot))))
+  up_size_cluster <- bind_rows(up_size_cluster_list) %>% as.matrix
+  
+  ## 2.5% CI
+  low_size_cluster_list <- lapply(fig_hist_list,
+                                  function(X)
+                                    if(!is.null(X$low_size_cluster_barplot))
+                                      return(as.data.frame(t(X$low_size_cluster_barplot))))
+  low_size_cluster <- bind_rows(low_size_cluster_list) %>% as.matrix
+  
+  ## Number of singletons
+  singletons_list <- lapply(fig_hist_list,
+                                  function(X)
+                                    if(!is.null(X$med_prop_singletons))
+                                      return(as.data.frame(t(X$med_prop_singletons))))
+  singletons <- bind_rows(singletons_list) %>% as.matrix
+  
+  ## Median number of imports, and number of imports correctly inferred
+  med_imports_list <- lapply(fig_hist_list,
+                            function(X)
+                              if(!is.null(X$med))
+                                return(as.data.frame(t(X$med))))
+  med_imports <- bind_rows(med_imports_list) %>% as.matrix
+
+  ## 97.5% CI
+  up_imports_list <- lapply(fig_hist_list,
+                             function(X)
+                               if(!is.null(X$up))
+                                 return(as.data.frame(t(X$up))))
+  up_imports <- bind_rows(up_imports_list) %>% as.matrix
+  
+  ## 2.5% CI
+  low_imports_list <- lapply(fig_hist_list,
+                             function(X)
+                               if(!is.null(X$low))
+                                 return(as.data.frame(t(X$low))))
+  low_imports <- bind_rows(low_imports_list) %>% as.matrix
+
   ## Plot is mixing base plot and ggplot so need to use Viewport
   plot.new()
   grid.newpage()
@@ -81,12 +114,15 @@ generate_figure_3_4 <- function(med_size_cluster, up_size_cluster,
   ## Heatmap
   pushViewport(viewport(layout.pos.row = 2))
   
+  ## List of all heatmaps in data
+  list_heatmap <- lapply(list_fig_heatmap, function(X) return(X$dt_heatmap))
   ## dt_heatmap merges the data table contained in list_heatmap
-  dt_heatmap <- bind_rows(list_heatmap)
+  dt_heatmap <- bind_rows(list_heatmap, .id = "id")
+  dt_heatmap[prop<0.01, prop := 0]
   # Generate the heatmaps
   p <- ggplot(dt_heatmap, aes(sensitivity, precision)) + 
     geom_tile(aes(fill = prop)) + 
-    facet_grid(.~type) + 
+    facet_grid(.~id) + 
     scale_fill_gradient2(na.value = "lightgrey",
                          low = "white", mid = "lightblue", midpoint = log(0.1),
                          high = "darkblue",
@@ -95,9 +131,6 @@ generate_figure_3_4 <- function(med_size_cluster, up_size_cluster,
                          name = "Proportion 
 of cases")
   p <- p + theme_classic() + 
-#     labs(x = "Proportion of epi cluster in inferred cluster",
-#          y = "Proportion of inferred cluster not in epi cluster
-# (False positives)") + 
     labs(x = "Sensitivity",
          y = "Precision") +
     theme(axis.ticks = element_blank(), 
