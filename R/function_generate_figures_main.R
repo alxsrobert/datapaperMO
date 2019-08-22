@@ -1,3 +1,42 @@
+generate_figure_3 <- function(dt_cases, ref_breaks, categ){
+  data(state, package = "datasets")
+  dt_map_cases <- data.table(abb = c(state.abb, "COL"))
+  dt_map_cases[, region := tolower(c(state.name, "district of columbia"))]
+  setkey(dt_map_cases, abb)
+  dt_map_cases[, cases := 0]
+  dt_map_cases[names(table(dt_cases$State)),
+               cases := as.numeric(table(dt_cases$State))]
+  dt_map_cases <- dt_map_cases[region != "alaska",]
+  dt_map_cases <- dt_map_cases[region != "hawaii",]
+  
+  all_states <- map_data("state")
+  Total <- merge(all_states, dt_map_cases, by="region")
+  Total <- Total %>% mutate(category=cut(cases, breaks=ref_breaks,
+                                         include.lowest = T, labels=categ))
+  
+  p <- ggplot(Total, aes(x=Total$long, y=Total$lat))
+  p <- p + geom_polygon(data=Total, aes(group = group, fill = Total$category),
+                        color="black") +
+    scale_fill_manual(values = brewer.pal(n = length(ref_breaks), name = 'Purples'),
+                      na.value = "grey", breaks = categ)
+
+  P1 <- p + theme_bw()  + labs(fill = "Number of \ncases", fill = "", x="", y="",
+                               title = "A")
+  P1 <- P1 + scale_y_continuous(breaks=c()) + scale_x_continuous(breaks=c()) + 
+    theme(panel.border =  element_blank(), legend.text=element_text(size=20), 
+          legend.title = element_text(size = 18), title = element_text(size = 20))
+  
+  P2 <- ggplot(dt_cases, aes(x = year(dt_cases$Date))) +
+    geom_histogram(colour = NA, binwidth = 1)
+  P2 <- P2 + theme_classic() + theme(axis.title = element_text(size = 18),
+                                     axis.text = element_text(size = 15), 
+                                     title = element_text(size = 20))  + 
+    labs(x="Year", y="Number of cases", title = "B")
+  
+  grid.arrange(P1, P2, nrow = 2)
+  
+}
+
 #' Title: Generate Figure 3 / 4
 #'
 #'
@@ -9,7 +48,7 @@
 #' @export
 #'
 #' @examples
-generate_figure_3_4 <- function(fig_hist_list, list_fig_heatmap){
+generate_figure_4_5 <- function(fig_hist_list, list_fig_heatmap, ref = T){
   ## Median values of cluster size distributions
   med_size_cluster_list <- lapply(fig_hist_list,
                                   function(X)
@@ -80,18 +119,20 @@ generate_figure_3_4 <- function(fig_hist_list, list_fig_heatmap){
                xlab = "Cluster size", ylab = "Proportion", 
                border = NA)
   # CIs
-  arrows(x0 = b[-nrow(b),], y0 = low_size_cluster[, -1], 
-         x1 = , y1 = up_size_cluster[, -1], angle = 90, 
-         code = 3,length = 0.1, lwd =  0.5)
+  if(ref == F){
+    arrows(x0 = b, y0 = low_size_cluster[, -1], x1 = , 
+           y1 = up_size_cluster[, -1], angle = 90, code = 3,
+           length = 0.1, lwd =  0.5)
+  } else
+    arrows(x0 = b[-nrow(b),], y0 = low_size_cluster[, -1], x1 = , 
+           y1 = up_size_cluster[, -1], angle = 90, code = 3,
+           length = 0.1, lwd =  0.5)
 
   
   ## Number of singletons and imports
-  par(fig = c(0.37, 0.78, 0.72, 1),family = "sans",
-      omi = c(0,0,0,0),
-      cex.lab = 1.4,
-      cex.axis = 1.2, 
-      mar = c(3,3.5,0,1)+ 1.1,
-      las=1, bty="l", tcl=-1, lwd=2,
+  par(fig = c(0.27, 0.72, 0.72, 1),family = "sans",
+      omi = c(0,0,0,0), cex.lab = 1.4, cex.axis = 1.2, 
+      mar = c(3,3.5,0,1)+ 1.1, las=1, bty="l", tcl=-1, lwd=2,
       mgp = c(3, 1, 0), new = T)
   b <- barplot(cbind(imports = med_imports[,1], singletons = med_size_cluster[, 1]),
                col = grey.colors(nrow(med_size_cluster)),
@@ -100,9 +141,14 @@ generate_figure_3_4 <- function(fig_hist_list, list_fig_heatmap){
                ylab = "Number of cases", 
                border = NA)
   # CIs
-  arrows(x0 = b[-nrow(b), ], y0 = cbind(low_imports[,1], low_size_cluster[, 1]), 
-         x1 = , y1 = cbind(up_imports[,1], up_size_cluster[, 1]), angle = 90, 
-         code = 3,length = 0.1, lwd =  0.5)
+  if(ref == F){
+    arrows(x0 = b, y0 = cbind(low_imports[,1], low_size_cluster[, 1]), 
+           x1 = , y1 = cbind(up_imports[,1], up_size_cluster[, 1]), angle = 90, 
+           code = 3,length = 0.1, lwd =  0.5)
+  } else 
+    arrows(x0 = b[-nrow(b), ], y0 = cbind(low_imports[,1], low_size_cluster[, 1]), 
+           x1 = , y1 = cbind(up_imports[,1], up_size_cluster[, 1]), angle = 90, 
+           code = 3,length = 0.1, lwd =  0.5)
   # Number of imports / singletons correctly inferred (i.e. who are 
   # imports / singletons in the data)
   sing_vect <- c(med_imports[,2], singletons[,1])
@@ -118,7 +164,7 @@ generate_figure_3_4 <- function(fig_hist_list, list_fig_heatmap){
   list_heatmap <- lapply(list_fig_heatmap, function(X) return(X$dt_heatmap))
   ## dt_heatmap merges the data table contained in list_heatmap
   dt_heatmap <- bind_rows(list_heatmap, .id = "id")
-  dt_heatmap[prop<0.01, prop := 0]
+  dt_heatmap[prop<0.001, prop := 0]
   # Generate the heatmaps
   p <- ggplot(dt_heatmap, aes(sensitivity, precision)) + 
     geom_tile(aes(fill = prop)) + 
@@ -154,7 +200,7 @@ of cases")
 #' @export
 #'
 #' @examples
-generate_figure_5 <- function(list_factor_import, ref_breaks, categ){
+generate_figure_6 <- function(list_factor_import, ref_breaks, categ){
   ## Load data with all abbreviations and state names
   data(state, package = "datasets")
   dt_map_cases <- data.table(abb = c(state.abb, "COL"))
