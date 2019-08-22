@@ -14,6 +14,9 @@
 #' @param dt_state_county Data table of each county and the state they belong to.
 #'
 #' @return
+#' 
+#' A data frame containing the ID, State, Date, Genotype, County, Age group, 
+#' import status, cluster and generation number of the generated cases
 #' @export
 #'
 #' @examples
@@ -64,6 +67,8 @@ new_case <- function(sec, date_index, county_index, age_group_index, genotype_in
 #' @param dt_state_county Data table of each county and the state they belong to.
 #'
 #' @return
+#' A list containing the linelist of cases, and the distance matrix, the number of 
+#' inhabitants in each county, and the age matrix used to generate it.
 #' @export
 #'
 #' @examples
