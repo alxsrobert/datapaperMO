@@ -4,6 +4,8 @@
 #' @param dt_cases 
 #'
 #' @return
+#' @param factor_import 
+#'
 #' @export
 #'
 #' @examples
@@ -26,27 +28,36 @@ case_state <- function(clust_matrix, dt_cases){
 
 #' Title
 #'
-#' @param X 
-#'
+#' @param out
+#' 
+#' @param dt_cases
+#' 
+#' @param burnin
+#' 
+#' @param sample_every
+#' 
+#' @param max_clust
+#' 
+#' @param thresh_barplot
+#' 
+#' @param diff
+#' 
 #' @return
-#' @param med_size_cluster List containing the Median values of cluster size 
-#' distributions in each run or data included in the histogram.
-#' @param up_size_cluster List containing the 97.5% quantile of cluster size 
-#' distributions in each run or data included in the histogram.
-#' @param low_size_cluster List containing the 2.5% quantile of cluster size 
-#' distributions in each run or data included in the histogram.
-#' @param singletons List containing the 97.5% quantile of cluster size 
-#' distributions in each run or data included in the histogram.
-#' @param med_imports List containing the median number of imports, and the
-#' number of imports correctly inferred in each run or data included in the
-#' histogram.
-#' @param up_imports List containing the 97.5% quantile of the number of imports, 
-#' and the number of imports correctly inferred in each run or data included in 
-#' the histogram.
-#' @param low_imports List containing the 97.5% quantile of the number of imports, 
+#' List including \code{med_size_cluster} vector containing the Median values of 
+#' cluster size distributions in each run or data included in the histogram ;
+#' \code{up_size_cluster} vector containing the 97.5% quantile of cluster size 
+#' distributions in each run or data included in the histogram; \code{low_size_cluster}
+#' vector containing the 2.5% quantile of cluster size distributions in each run 
+#' or data included in the histogram. \code{singletons} vector containing the 
+#' 97.5% quantile of cluster size distributions in each run or data included in
+#' the histogram. \code{med_imports} vector containing the median number of 
+#' imports, and the number of imports correctly inferred in each run or data
+#' included in the histogram. \code{up_imports} vector containing the 97.5% 
+#' quantile of the number of imports, and the number of imports correctly 
+#' inferred in each run or data included in the histogram. \code{low_imports}
+#' vector containing the 97.5% quantile of the number of imports, 
 #' and the number of imports correctly inferred in each run or data included in the
-#' histogram.
-#' @param list_heatmap List containing the heatmap data tables for each run.
+#' histogram. \code{list_heatmap} vector containing the heatmap data tables for each run.
 #' 
 #' @export
 #'
