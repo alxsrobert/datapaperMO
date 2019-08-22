@@ -4,11 +4,12 @@ transp <- function(col, alpha=.5){
   return(res)
 }
 
-supp_fig_eval_cluster <- function(list_fig){
-  par(mfrow = c(length(list_fig),2), omi = c(0.2,0.25,0,0), cex.lab = 1.4, 
-      cex.axis = 1.2, mar = c(1,1,1,-1)+ 1.1, las=1, bty="l", tcl=-1, lwd=2,
+supp_fig_eval_cluster <- function(list_fig, titles){
+  par(mfrow = c(length(list_fig),2), oma = c(2,1,0,1), cex.lab = 2, 
+      cex.axis = 1.5, mar = c(1,3.5,1,-1)+ 1.1, las=1, bty="l", tcl=-1, lwd=2,
       mgp = c(3, 1, 0))
-  lapply(list_fig, function(X){
+  for (i in 1:length(list_fig)){
+    X <- list_fig[[i]]
     low_sens <- X$low_sensitivity[order(X$med_sensitivity)]
     up_sens <- X$up_sensitivity[order(X$med_sensitivity)]
     med_sens <- X$med_sensitivity[order(X$med_sensitivity)]
@@ -24,6 +25,7 @@ supp_fig_eval_cluster <- function(list_fig){
     yy=c(low_sens, 
          rev(up_sens))
     polygon(xx, yy, col = transp("black", 0.3), border = NA)
+    mtext(text = titles[i], adj = 0, cex = 1.5, line = 0.5)
     
     plot(med_prec, type = "l", ylab = "", xlab = "")
     xx=c(1:length(med_prec), 
@@ -31,7 +33,13 @@ supp_fig_eval_cluster <- function(list_fig){
     yy=c(low_prec, 
          rev(up_prec))
     polygon(xx, yy, col = transp("black", 0.3), border = NA)
-  })
+  }
+  title(outer = T, xlab = "Cases", line = 0.5, cex.lab = 2)
+  title(outer = T, ylab = "Sensitivity", line = -1, cex.lab = 2)
+  par(fig = c(0.5, 1, 0, 1), new = T)
+  plot.new()
+  title(ylab = "Precision", line = 3, cex.lab = 2)
+  
 }
 
 estim_params <- function(out, burnin, sample_every){
@@ -95,8 +103,7 @@ supp_fig_param_estimate <- function(list_out, burnin, sample_every){
          code = 3,length = 0.1, lwd =  0.5)
   
   axis(side = 1, at = 1:dim(output)[1], labels = rep("", dim(output)[1]))
-  mgp.axis(side = 1, at = 1:dim(output)[1], labels = rownames(output), mgp = c(3.5,2.5,0))
-  
+
 }
 
 supp_fig_stratified_state <- function(out, dt_cases, burnin, sample_every, max_clust){
@@ -174,6 +181,20 @@ supp_fig_stratified_state <- function(out, dt_cases, burnin, sample_every, max_c
            x1 = , y1 = up_size_cluster_inferred_barplot, angle = 90, 
            code = 3,length = 0.1)
   }
+  title(xlab = "Cluster size", outer = T, line = .5, cex.lab = 2)
+  title(ylab = "Number", outer = T, line = 0.5, cex.lab = 2)
+  par(mfrow = c(1, 1),
+      omi = c(0.2,0.25,0,0),
+      cex.lab = 1.4,
+      cex.axis = 1.2, 
+      mar = c(2,1,0,-1)+ 1.1,
+      las=1, bty="l", tcl=-1, lwd=2,
+      mgp = c(3, 1, 0), new = T)
+  legend("center",
+         fill = c(grey.colors(5)[c(2, 5)], NA), cex = 1.2,
+         border = NA, 
+         legend = c("Inferred distribution", 
+                    "Epidemiological cluster"), bty = "n")
   
   
 }
@@ -291,21 +312,12 @@ supp_fig_sec_map <- function(list_out, dt_cases){
   
   Total <- merge(all_states, dt_map, by="region")
   
-  p <- ggplot(Total, aes(x=Total$long, y=Total$lat)) +   
-    facet_grid(id~.)
-  p <- p + geom_polygon(data=Total, aes(group = group
-                                        # , fill=as.numeric(Total$fact)
-                                        , fill = Total$category),
+  p <- ggplot(Total, aes(x=Total$long, y=Total$lat)) + facet_grid(id~.)
+  p <- p + geom_polygon(data=Total, aes(group = group, fill = Total$category),
                         color = "black") +
     scale_fill_manual(values = brewer.pal(n = 5, name = 'Purples'),
-                      na.value = "grey"
-                      , breaks = categ_map
-                      # , guide="colorbar"
-    )
-  p <- p + theme_bw()  + 
-    labs(#fill = "Number of measles r0\nreported per state",
-      fill = "",
-      x="", y="")
+                      na.value = "grey", breaks = categ_map)
+  p <- p + theme_bw()  + labs(fill = "", x="", y="")
   p <- p + scale_y_continuous(breaks=c()) + scale_x_continuous(breaks=c()) + 
     theme(panel.border =  element_blank(), legend.text=element_text(size=25), 
           strip.text.y = element_blank(),
@@ -313,8 +325,8 @@ supp_fig_sec_map <- function(list_out, dt_cases){
   p
 }
 
-supp_fig_distance_transmission <- function(list_out, burnin, sample_every, dt_cases,
-                                           dt_distance){
+supp_fig_distance_transmission <- function(list_out, burnin, sample_every, 
+                                           dt_cases, dt_distance){
   dt_distance[, id_dist := paste0(county1, "_", county2)]
   setkey(dt_distance, id_dist)
   
@@ -364,4 +376,76 @@ supp_fig_distance_transmission <- function(list_out, burnin, sample_every, dt_ca
   arrows(x0 = b, y0 = low_dist, x1 = , y1 = up_dist, angle = 90, code = 3,
          length = 0.1)
 
+}
+supp_desc_data <- function(dt_cases){
+  data(state, package = "datasets")
+  dt_map_clusters <- data.table(abb = c(state.abb, "COL"))
+  dt_map_clusters[, region := tolower(c(state.name, "district of columbia"))]
+  setkey(dt_map_clusters, abb)
+  dt_map_clusters[, clusters := 0]
+  tab_clust_state <- table(dt_cases$State, dt_cases$cluster)
+  nb_clust_state <- apply(tab_clust_state, 1, function(X){
+    if(any(names(X) == ".")){
+      if(X["."]>0)
+        return(length(which(X>0))+X["."]-1)
+      return(length(which(X>0))+X["."])
+    }
+    else
+      return(length(which(X>0)))
+  })
+  
+  dt_map_clusters[names(nb_clust_state),
+                  clusters := as.numeric(nb_clust_state)]
+  dt_map_clusters <- dt_map_clusters[region != "alaska",]
+  dt_map_clusters <- dt_map_clusters[region != "hawaii",]
+  all_states <- map_data("state")
+  Total <- merge(all_states, dt_map_clusters, by="region")
+
+  dt_cases[, age_group_char := paste0((age_group-1)*5, "-", (age_group*5-1))]
+  
+  ref_breaks <- c(1, 5, 10, 20, 2000)
+  categ <- c("1-5","5-10","10-20","20+")
+  Total <- Total %>% 
+    mutate(category=cut(clusters, breaks=ref_breaks,include.lowest = T, 
+                        labels=categ))
+  
+  p <- ggplot(Total, aes(x=Total$long, y=Total$lat))
+  p <- p + geom_polygon(data=Total, aes(group = group, fill = Total$category),
+                        color="black") +
+    scale_fill_manual(values = brewer.pal(n = 4, name = 'Purples'), 
+                      na.value = "grey", breaks = categ)
+
+  P1 <- p + theme_bw()  + labs(fill = "", x="", y="", title = "A")
+  P1 <- P1 + scale_y_continuous(breaks=c()) + scale_x_continuous(breaks=c()) + 
+    theme(panel.border =  element_blank(), legend.text=element_text(size=20), 
+          legend.title = element_text(size = 18), title = element_text(size = 20))
+  
+  P2 <- ggplot(dt_cases, 
+               aes(x = factor(dt_cases$age_group_char, 
+                              levels = paste0(((1:max(dt_cases$age_group))-1)*5, "-",
+                                              ((1:max(dt_cases$age_group))*5-1)))))+
+    geom_histogram(colour = NA, stat = "count")
+  P2 <- P2 + theme_classic() + theme(axis.title = element_text(size = 18),
+                                     axis.text = element_text(size = 15), 
+                                     title = element_text(size = 20))  + 
+    labs(x="Age group", y="Number of cases", title = "B")
+  
+  grid.arrange(P1, P2, nrow = 2)
+  
+}
+
+supp_post <- function(list_out, burnin, sample_every){
+  par(mfrow = c(length(list_out),1), oma = c(2,1,0,1), cex.lab = 2, 
+      cex.axis = 1.5, mar = c(1,5,1,-1)+ 1.1, las=1, bty="l", tcl=-1, lwd=2,
+      mgp = c(3, 1, 0))
+  for(i in 1:length(list_out)){
+    out_X <- list_out[[i]]
+    out_X_burnin <- as.numeric(out_X[(burnin/sample_every):dim(out_X)[1],
+                                     "post"])
+    plot(out_X_burnin, type = "l", ylab = "")
+    mtext(text = LETTERS[i], adj = 0, cex = 1.5, line = 0.5)
+  }
+  title(outer = T, ylab = "Posterior", line = -1, cex.lab = 2)
+  title(outer = T, xlab = "Iteration", line = 0.5, cex.lab = 2)
+  
 }
