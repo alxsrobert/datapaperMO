@@ -204,6 +204,7 @@ config$delta <- 30
 config$move_t_inf <- TRUE
 config$move_kappa <- TRUE
 config$move_swap_cases <- TRUE
+config$init_alpha <- NULL
 config <- create_config(data = data,
                         config)
 moves <- custom_moves()
@@ -215,6 +216,7 @@ saveRDS(out, file = paste0("toy_outbreak_runs/import_time_only.rds"))
 ## Import, time and genotype
 data$genotype <- dt_cases$Genotype
 data <- outbreaker_data(data = data)
+config$init_alpha <- NULL
 config <- create_config(data = data,
                         config)
 out <- outbreaker(data = data,config = config,priors = priors,
@@ -227,6 +229,7 @@ likelihoods <- custom_likelihoods(age = f_null)
 config$move_a <- TRUE
 config$move_b <- TRUE
 config$gamma <- 100
+config$init_alpha <- NULL
 
 config <- create_config(data = data,
                         config)
