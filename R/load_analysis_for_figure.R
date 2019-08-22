@@ -2,8 +2,9 @@
 
 source("R/library_importation.R")
 data("toy_outbreak")
-source("R/prepare_for_figures.R")
+source("R/function_prepare_for_figures.R")
 source("R/function_generate_figures_main.R")
+source("R/function_supplement_figures.R")
 ## Load elements of the list toy_outbreak
 dt_cases <- toy_outbreak[["cases"]]
 dt_cases <- dt_cases[order(Date), ]
@@ -51,103 +52,73 @@ ref_size_clusters <- table(ref_size_clusters)
 
 ## Number of cluster in each group from group_barplot
 size_cluster_ref_barplot <- t(rowsum(x = as.matrix(ref_size_clusters), 
-                                     group = groups_barplot))
-colnames(size_cluster_ref_barplot) <- names_barplot
+                                     group = groups_barplot)) %>% as.numeric
+names(size_cluster_ref_barplot) <- names_barplot
 
 ## Number of singletons in data
 size_cluster_ref_singletons <- numeric(length(size_cluster_ref_barplot))
 names(size_cluster_ref_singletons) <- names(size_cluster_ref_barplot)
 size_cluster_ref_singletons[1] <- size_cluster_ref_barplot[1]
 
+med_ref <- rep(size_cluster_ref_barplot %>% sum, 2)
+names(med_ref) <- c("Imports", "Import status \ncorrectly inferred")
+
+fig_ref <- list(med_size_cluster_barplot = size_cluster_ref_barplot,
+                med_prop_singletons = size_cluster_ref_barplot,
+                med = med_ref)
+
 #### Load measlesoutbreaker runs ####
 
 ## threshold 001
-out <- readRDS(file = "toy_outbreak_runs/no_import_thresh001.rds")
-fig_001 <- prepare_for_figures(out = out, 
+out_001 <- readRDS(file = "toy_outbreak_runs/no_import_thresh001.rds")
+fig_001 <- prepare_for_figures(out = out_001, 
                                dt_cases = dt_cases, burnin = burnin, 
                                sample_every = sample_every, 
                                max_clust = max_clust,
                                thresh_barplot = thresh_barplot, diff = diff)
 
 ## threshold 005
-out <- readRDS(file = "toy_outbreak_runs/no_import_thresh005.rds")
-fig_005 <- prepare_for_figures(out = out, dt_cases = dt_cases, burnin = burnin, 
+out_005 <- readRDS(file = "toy_outbreak_runs/no_import_thresh005.rds")
+fig_005 <- prepare_for_figures(out = out_005, dt_cases = dt_cases, burnin = burnin, 
                                sample_every = sample_every, max_clust = max_clust,
                                thresh_barplot = thresh_barplot, diff = diff)
 
 ## threshold 09
-out <- readRDS(file = "toy_outbreak_runs/no_import_thresh09.rds")
-fig_09 <- prepare_for_figures(out = out, 
+out_09 <- readRDS(file = "toy_outbreak_runs/no_import_thresh09.rds")
+fig_09 <- prepare_for_figures(out = out_09, 
                               dt_cases = dt_cases, burnin = burnin, 
                               sample_every = sample_every, 
                               max_clust = max_clust,
                               thresh_barplot = thresh_barplot, diff = diff)
 
 ## threshold 095
-out <- readRDS(file = "toy_outbreak_runs/no_import_thresh095.rds")
-fig_095 <- prepare_for_figures(out = out, 
+out_095 <- readRDS(file = "toy_outbreak_runs/no_import_thresh095.rds")
+fig_095 <- prepare_for_figures(out = out_095, 
                                dt_cases = dt_cases, burnin = burnin, 
                                sample_every = sample_every, 
                                max_clust = max_clust,
                                thresh_barplot = thresh_barplot, diff = diff)
 
 ## with imports
-out <- readRDS(file = "toy_outbreak_runs/with_import.rds")
-fig_import <- prepare_for_figures(out = out, 
+out_import <- readRDS(file = "toy_outbreak_runs/with_import.rds")
+fig_import <- prepare_for_figures(out = out_import, 
                                   dt_cases = dt_cases, burnin = burnin, 
                                   sample_every = sample_every, 
                                   max_clust = max_clust,
                                   thresh_barplot = thresh_barplot, diff = diff)
 
 ## with imports 005
-out <- readRDS(file = "toy_outbreak_runs/with_import_005.rds")
-fig_005_wi <- prepare_for_figures(out = out, 
+out_005_wi <- readRDS(file = "toy_outbreak_runs/with_import_005.rds")
+fig_005_wi <- prepare_for_figures(out = out_005_wi, 
                                   dt_cases = dt_cases, burnin = burnin, 
                                   sample_every = sample_every, 
                                   max_clust = max_clust,
                                   thresh_barplot = thresh_barplot, diff = diff)
 
 ## with imports 095
-out <- readRDS(file = "toy_outbreak_runs/with_import_095.rds")
-fig_095_wi <- prepare_for_figures(out = out, 
+out_095_wi <- readRDS(file = "toy_outbreak_runs/with_import_095.rds")
+fig_095_wi <- prepare_for_figures(out = out_095_wi, 
                                   dt_cases = dt_cases, burnin = burnin, 
                                   sample_every = sample_every, 
                                   max_clust = max_clust,
                                   thresh_barplot = thresh_barplot, diff = diff)
-## no_like
-out <- readRDS(file = "toy_outbreak_runs/import_no_like.rds")
-fig_no_lik <- prepare_for_figures(out = out, 
-                                  dt_cases = dt_cases, burnin = burnin, 
-                                  sample_every = sample_every, 
-                                  max_clust = max_clust,
-                                  thresh_barplot = thresh_barplot, diff = diff)
-
-#### Generate figure ####
-
-## Add id to heatmaps
-fig_001[["dt_heatmap"]][, type := "001"]
-fig_005[["dt_heatmap"]][, type := "005"]
-fig_09[["dt_heatmap"]][, type := "09"]
-fig_095[["dt_heatmap"]][, type := "095"]
-fig_import[["dt_heatmap"]][, type := "import"]
-fig_005_wi[["dt_heatmap"]][, type := "005_wi"]
-
-## Call function to generate figures 3 and 4
-fig_hist_list <- list(fig_001, fig_005, fig_09, fig_095, fig_import, fig_005_wi)
-list_fig_heatmap <- list(fig_import, fig_005_wi)
-generate_figure_3_4(fig_hist_list, list_fig_heatmap)
-
-
-## Subsequent cases / number of imports in each state at every iteration
-list_factor_import <- list(fig_005[["factor_import"]], 
-                           fig_09[["factor_import"]],
-                           fig_005_wi[["factor_import"]])
-## Categories in figure 5
-ref_breaks <- c(0, 1, 3, 5, 10, 50)
-categ <- c("0-1",
-           "1-3",
-           "3-5",
-           "5-10",
-           "10+")
-
-generate_figure_5(list_factor_import, ref_breaks, categ)
