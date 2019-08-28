@@ -12,6 +12,7 @@
 #' @param polymod_prop Matrix of proportion of contacts between age groups.
 #' @param w Vector of the serial interval of the disease.
 #' @param dt_state_county Data table of each county and the state they belong to.
+#' @param prop_gen: proportion of genotype set to NA after generating the data
 #'
 #' @return
 #' 
@@ -65,6 +66,7 @@ new_case <- function(sec, date_index, county_index, age_group_index, genotype_in
 #' @param t_min Date minimum date of infection of ancestors.
 #' @param t_max Date maximum date of infection of ancestors.
 #' @param dt_state_county Data table of each county and the state they belong to.
+#' @param prop_gen: proportion of genotype set to NA after generating the data
 #'
 #' @return
 #' A list containing the linelist of cases, and the distance matrix, the number of 
@@ -74,7 +76,7 @@ new_case <- function(sec, date_index, county_index, age_group_index, genotype_in
 #' @examples
 generate_dataset <- function(a, b, gamma, dt_distance, 
                              polymod_prop, w, nb_cases, r0_state, pop_county, 
-                             t_min, t_max, dt_state_county){
+                             t_min, t_max, dt_state_county, prop_gen = 0.6){
   ## Compute the probability of connection between counties using gravity model
   dt_distance[, nb_commut := pop_county1**a*exp(-distance_km*b)]
   dt_distance[distance_km > gamma, nb_commut := 0]
@@ -143,7 +145,7 @@ generate_dataset <- function(a, b, gamma, dt_distance,
   }
   # 60% of the genotypes are set to be "not attributed"
   gen_reported <- runif(nrow(dt_cases), 0, 1)
-  dt_cases[gen_reported < 0.6, Genotype := "Not attributed"]
+  dt_cases[gen_reported < prop_gen, Genotype := "Not attributed"]
   
   
   dt_distance <- dt_distance[,.(county1, county2, distance_km)]
