@@ -1,5 +1,5 @@
 # datapaperMO
-analysis of fake_outbreak dataset from the measlesoutbreaker package
+analysis of toy_outbreak dataset from the measlesoutbreaker package
 
 install package measlesoutbreaker from "alxsrobert/measlesoutbreaker"
 ```R
