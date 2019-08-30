@@ -53,5 +53,34 @@ ref_breaks <- c(0, 1, 3, 5, 10, 50)
 categ <- c("0-1", "1-3", "3-5", "5-10", "10+")
 
 generate_figure_6(list_factor_import, ref_breaks, categ)
+
+## Figures in supplement
+list_out <- list(out_import, out_005, out_09,
+                 out_095, out_005_wi, out_095_wi)
+
+supp_fig_param_estimate(list_out, burnin, sample_every)
+
+supp_fig_stratified_state(out_import, dt_cases, burnin, sample_every, max_clust)
+supp_fig_stratified_state(out_005, dt_cases, burnin, sample_every, max_clust)
+supp_fig_stratified_state(out_095, dt_cases, burnin, sample_every, max_clust)
+supp_fig_stratified_state(out_005_wi, dt_cases, burnin, sample_every, max_clust)
+
+list_out <- list(out_import, out_005, out_005_wi)
+list_fig <- list(fig_import, fig_005, fig_005_wi, 
+                 fig_09, fig_095)
+
+
+supp_fig_sec_overall(list_out, burnin, sample_every)
+supp_fig_sec_map(list_out, dt_cases)
+supp_fig_distance_transmission(list_out = list_out, burnin = burnin, 
+                               sample_every = sample_every, dt_cases = dt_cases)
+
+supp_fig_eval_cluster(list_fig, titles = NULL)
+
+list_out <- list(out_import, out_005, out_005_wi, 
+                 out_09, out_095)
+supp_post(list_out, burnin, sample_every)
+supp_desc_data(dt_cases = dt_cases)
+
 ```
 
