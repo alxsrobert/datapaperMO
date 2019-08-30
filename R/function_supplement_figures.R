@@ -326,23 +326,70 @@ supp_fig_sec_map <- function(list_out, dt_cases){
 }
 
 supp_fig_distance_transmission <- function(list_out, burnin, sample_every, 
-                                           dt_cases, dt_distance){
+                                           dt_cases){
+  # Load excel file with population centroid in every US county
+  dt_loca_pop_center <- as.data.table(read.csv(file = "data/pop_center.csv",
+                                               stringsAsFactors = FALSE, 
+                                               colClasses = c("character", "character",
+                                                              "character","character",
+                                                              "numeric", "numeric",
+                                                              "numeric", "character")))
+  # dt_state_county includes county ID and the state it belongs to
+  dt_state_county <- dt_loca_pop_center[,.(ID_COUNTY, STNAME)]
+  setkey(dt_state_county, ID_COUNTY)
+  # Create empty data table to story distance between every UK county
+  dt_distance <- as.data.table(matrix(0, nrow = nrow(dt_loca_pop_center)**2,
+                                      ncol = 9))
+  colnames(dt_distance) <- c("county1", "county2", "distance_km",
+                             "pop_county1", "long1", "lat1",
+                             "pop_county2", "long2", "lat2")
+  # 1st column: county1
+  dt_distance[, county1 := as.character(county1)]
+  dt_distance[, county1 := rep(dt_loca_pop_center$ID_COUNTY, nrow(dt_loca_pop_center))]
+  setkey(dt_loca_pop_center, ID_COUNTY)
+  # 5th column: long value of county1's population centroid
+  dt_distance[, long1 := dt_loca_pop_center[dt_distance$county1, LONGITUDE]]
+  # 6th column: lat value of county1's population centroid
+  dt_distance[, lat1 := dt_loca_pop_center[dt_distance$county1,LATITUDE]]
+  # 2nd column: county2
+  dt_distance[, county2 := rep(dt_loca_pop_center$ID_COUNTY,each = nrow(dt_loca_pop_center))]
+  # 8th column: long value of county2's population centroid
+  dt_distance[, long2 := dt_loca_pop_center[dt_distance$county2,LONGITUDE]]
+  # 9th column: lat value of county2's population centroid
+  dt_distance[, lat2 := dt_loca_pop_center[dt_distance$county2, LATITUDE]]
+  long1 <- dt_distance$long1
+  lat1 <- dt_distance$lat1
+  long2 <- dt_distance$long2
+  lat2 <- dt_distance$lat2
+  mat1 <- matrix(c(long1,lat1), ncol = 2)
+  mat2 <- matrix(c(long2, lat2), ncol = 2)
+  dist <- numeric(dim(dt_distance)[1])
+  # Compute distance between every centroid
+  dist <- distGeo(mat1, mat2)/1000
+  # 3rd column: distance between counties
+  dt_distance[, dist := dist]
+  # 4th column: population in county1
+  dt_distance[, pop_county1 := dt_loca_pop_center[dt_distance$county1,POPULATION]]
+  # 7th column: population in county2
+  dt_distance[, pop_county2 := dt_loca_pop_center[dt_distance$county2, POPULATION]]
   dt_distance[, id_dist := paste0(county1, "_", county2)]
+  
   setkey(dt_distance, id_dist)
   
   list_transmission_dist <- lapply(list_out, function(out_X){
     clust_transmission <- t(apply(out_X[(burnin/sample_every):dim(out_X)[1],
-                                      grep("alpha", colnames(out_X))], 1, function(X){
-                                        X[!is.na(X)] <- names(X[X[!is.na(X)]])
-                                        X[is.na(X)] <- names(X[is.na(X)])
-                                        return(X)
-                                      }))
+                                        grep("alpha", colnames(out_X))], 1, 
+                                  function(X){
+                                    X[!is.na(X)] <- names(X[X[!is.na(X)]])
+                                    X[is.na(X)] <- names(X[is.na(X)])
+                                    return(X)}))
+    
     transmission_distance <- t(apply(clust_transmission, 1, function(X){
       X <- X[X != names(X)]
       X <- gsub(pattern = "alpha_", replacement = "", X)
       names(X) <- gsub(pattern = "alpha_", replacement = "", names(X))
-      dist <- dt_distance[paste0(dt_cases[as.numeric(X), INCITS], 
-                                 "_", dt_cases[as.numeric(names(X)), INCITS]),dist]
+      dist <- dt_distance[paste0(dt_cases[as.numeric(X), county], 
+                                 "_", dt_cases[as.numeric(names(X)), county]),dist]
       h <- hist(dist, breaks = c(0, 10, 20, 50, 100), plot = F)
       trans_dist <- h$counts
       names(trans_dist) <- c("0-10", "10-20", "20-50", "50-100")
@@ -375,8 +422,9 @@ supp_fig_distance_transmission <- function(list_out, burnin, sample_every,
                xlab = "Distance (km)", ylab = "Proportion", border = NA)
   arrows(x0 = b, y0 = low_dist, x1 = , y1 = up_dist, angle = 90, code = 3,
          length = 0.1)
-
+  
 }
+
 supp_desc_data <- function(dt_cases){
   data(state, package = "datasets")
   dt_map_clusters <- data.table(abb = c(state.abb, "COL"))
@@ -400,7 +448,7 @@ supp_desc_data <- function(dt_cases){
   dt_map_clusters <- dt_map_clusters[region != "hawaii",]
   all_states <- map_data("state")
   Total <- merge(all_states, dt_map_clusters, by="region")
-
+  
   dt_cases[, age_group_char := paste0((age_group-1)*5, "-", (age_group*5-1))]
   
   ref_breaks <- c(1, 5, 10, 20, 2000)
@@ -414,7 +462,7 @@ supp_desc_data <- function(dt_cases){
                         color="black") +
     scale_fill_manual(values = brewer.pal(n = 4, name = 'Purples'), 
                       na.value = "grey", breaks = categ)
-
+  
   P1 <- p + theme_bw()  + labs(fill = "", x="", y="", title = "A")
   P1 <- P1 + scale_y_continuous(breaks=c()) + scale_x_continuous(breaks=c()) + 
     theme(panel.border =  element_blank(), legend.text=element_text(size=20), 
