@@ -63,35 +63,30 @@ size_cluster_ref_singletons[1] <- size_cluster_ref_barplot[1]
 med_ref <- rep(size_cluster_ref_barplot %>% sum, 2)
 names(med_ref) <- c("Imports", "Import status \ncorrectly inferred")
 
-fig_ref <- list(med_size_cluster_barplot = size_cluster_ref_barplot,
+# Gather the reference values in the list fig_sim
+fig_sim <- list(med_size_cluster_barplot = size_cluster_ref_barplot,
                 med_prop_singletons = size_cluster_ref_barplot,
                 med = med_ref)
 
 #### Load measlesoutbreaker runs ####
 
-## no_like
-out_no_gen <- readRDS(file = "toy_outbreak_runs/no_import_thresh005_no_gen.rds")
-fig_no_gen <- prepare_for_figures(out = out_no_gen,
-                                   dt_cases = dt_cases, burnin = burnin,
-                                   sample_every = sample_every,
-                                   max_clust = max_clust,
+## Inference with absolute threshold (k = 0.05) when no cases was genotyped
+out_no_gen_sim <- readRDS(file = "toy_outbreak_runs/no_import_thresh005_no_gen.rds")
+fig_no_gen_sim <- prepare_for_figures(out = out_no_gen_sim,
+                                      dt_cases = dt_cases, burnin = burnin,
+                                      sample_every = sample_every,
+                                      max_clust = max_clust,
+                                      thresh_barplot = thresh_barplot, diff = diff)
+
+## Inference with absolute threshold (k = 0.05) when all cases were genotyped
+out_all_gen_sim <- readRDS(file = "toy_outbreak_runs/no_import_thresh005_all_gen.rds")
+fig_all_gen_sim <- prepare_for_figures(out = out_all_gen_sim, dt_cases = dt_cases, burnin = burnin,
+                                       sample_every = sample_every, max_clust = max_clust,
+                                       thresh_barplot = thresh_barplot, diff = diff)
+
+## Inference with absolute threshold (k = 0.05) and 40% of genotyped cases (same as data)
+out_005_sim <- readRDS(file = "toy_outbreak_runs/no_import_thresh005.rds")
+fig_005_sim <- prepare_for_figures(out = out_005_sim, dt_cases = dt_cases, burnin = burnin,
+                                   sample_every = sample_every, max_clust = max_clust,
                                    thresh_barplot = thresh_barplot, diff = diff)
-
-## time only
-out_all_gen <- readRDS(file = "toy_outbreak_runs/no_import_thresh005_all_gen.rds")
-fig_all_gen <- prepare_for_figures(out = out_all_gen, dt_cases = dt_cases, burnin = burnin,
-                                sample_every = sample_every, max_clust = max_clust,
-                                thresh_barplot = thresh_barplot, diff = diff)
-
-## time only
-out_005 <- readRDS(file = "toy_outbreak_runs/no_import_thresh005.rds")
-fig_005 <- prepare_for_figures(out = out_005, dt_cases = dt_cases, burnin = burnin,
-                                sample_every = sample_every, max_clust = max_clust,
-                                thresh_barplot = thresh_barplot, diff = diff)
-
-
-fig_hist_list <- list(fig_all_gen, fig_005, fig_ref)
-list_fig_heatmap <- list(fig_all_gen, fig_005)
-
-generate_figure_4_5(fig_hist_list, list_fig_heatmap)
 
