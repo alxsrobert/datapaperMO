@@ -14,22 +14,26 @@ In data:
 - pop_center.csv: Population centroid and population of every county (Source: https://www.census.gov/geographies/reference-files/2010/geo/2010-centers-population.html (per state : UNITED STATES)).
 - social_contact_uk.csv : Contact Matrix of contacts between age groups (Source: Social Contacts and Mixing Patterns Relevant to the Spread of Infectious Diseases)
 
-In src:
+In R:
 - library_importation.R: import libraries for analysis.
 - function_generate_dataset.R: Functions to generate toy_outbreak.
 - function_prepare_for_figures.R: Function to generate summary statistics on run.
 - function_generate_figures_main.R: function to generate figures similar to figure 3, 4, 5 and 6.
 - function_supplement_figures.R: function to generate figures similar to figures in the supplement.
-- load_analysis_for_figure.R: Load measlesoutbreaker runs generated with different thresholds.
-- load_data_distributions.R: Load prior distributions.
+- load_analysis_threshold.R: Load measlesoutbreaker runs generated with different import thresholds.
 - load_analysis_likelihoods.R: Load measlesoutbreaker runs generated with different likelihoods.
+- load_analysis_genotype.R: Load measlesoutbreaker runs generated with different proportion of genotyped cases.
+- load_data_distributions.R: Load prior distributions.
 - analysis_generated_data.R: Script to run measlesoutbreaker on toy_outbreak.
 - generate_figure.R: Generate all figures (main + supplement).
 
 To generate all figures, run the script generate_figure.R.
 Script to generate figures 3, 4, 5 and 6:
+
 ```R
-source("R/load_analysis_for_figure.R")
+source("R/load_analysis_threshold.R")
+source("R/load_analysis_likelihoods.R")
+source("R/load_analysis_genotype.R")
 ## Call function to generate figures 3
 ref_breaks <- c(1, 10, 50, 100, 500)
 categ <- c("1-10", "10-50", "50-100", "100-500")
@@ -81,6 +85,16 @@ list_out <- list(out_import, out_005, out_005_wi,
                  out_09, out_095)
 supp_post(list_out, burnin, sample_every)
 supp_desc_data(dt_cases = dt_cases)
+
+fig_hist_list <- list(fig_no_gen_sim, fig_005_sim, fig_all_gen_sim, fig_sim)
+list_fig_heatmap <- list(fig_no_gen_sim, fig_all_gen_sim)
+
+generate_figure_4_5(fig_hist_list, list_fig_heatmap)
+
+fig_hist_list <- list(fig_no_like, fig_time, fig_time_gen, fig_time_age, fig_time_spa, fig_ref)
+list_fig_heatmap <- list(fig_time_gen, fig_time_spa)
+
+generate_figure_4_5(fig_hist_list, list_fig_heatmap)
 
 ```
 
