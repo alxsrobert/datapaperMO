@@ -70,16 +70,20 @@ new_case <- function(sec, date_index, county_index, age_group_index, genotype_in
 #'
 #' @return
 #' A list containing the linelist of cases, and the distance matrix, the number of 
-#' inhabitants in each county, and the age matrix used to generate it.
+#' inhabitants in each county, and the age matrix used to generate the linelist.
 #' @export
 #'
 #' @examples
 generate_dataset <- function(a, b, gamma, dt_distance, 
                              polymod_prop, w, nb_cases, r0_state, pop_county, 
-                             t_min, t_max, dt_state_county, prop_gen = 0.6){
+                             t_min, t_max, dt_state_county, prop_gen = 0.4){
   ## Compute the probability of connection between counties using gravity model
+  # Number of connections
   dt_distance[, nb_commut := pop_county1**a*exp(-distance_km*b)]
+  # If the distance is above the threshold gamma, we consider the two counties are not 
+  # connected
   dt_distance[distance_km > gamma, nb_commut := 0]
+  # Calculate the proportion of connections between counties
   sum_commut <- dt_distance[, lapply(.SD,sum), by = county2,
                             .SDcols = "nb_commut"]
   setkey(sum_commut, county2)
@@ -143,19 +147,20 @@ generate_dataset <- function(a, b, gamma, dt_distance,
     }
     i <- i + 1 
   }
-  # 60% of the genotypes are set to be "not attributed"
+  # A proportion prop_gen of the genotypes are set to be "not attributed"
   gen_reported <- runif(nrow(dt_cases), 0, 1)
-  dt_cases[gen_reported < prop_gen, Genotype := "Not attributed"]
+  dt_cases[gen_reported > prop_gen, Genotype := "Not attributed"]
   
-  
+  ## Save the distance matrix used to generate dt_cases
   dt_distance <- dt_distance[,.(county1, county2, distance_km)]
   setkey(dt_distance, county1)
+  # Generate the distance matrix from the distance data table 
   distance_matrix <- sapply(unique(dt_distance$county1), 
                             function(X){
     return(dt_distance[county2 == X][, distance_km])
   })
   rownames(distance_matrix) <- colnames(distance_matrix)
-  
+  # Vect_pop: Vector of population per county
   vect_pop <- pop_county
   names(vect_pop) <- names(pop_county)
   vect_pop <- vect_pop[rownames(distance_matrix)]

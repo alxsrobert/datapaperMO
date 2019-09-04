@@ -1,3 +1,5 @@
+## Packages needed to generate and analyse measlesoutbreaker runs
+
 library(data.table)
 library(measlesoutbreaker)
 library(geosphere)
