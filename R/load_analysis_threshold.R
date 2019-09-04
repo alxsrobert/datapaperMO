@@ -1,3 +1,4 @@
+## Load measlesoutbreaker runs comparing the impact of the import threshold lambda 
 #### Load libraries and parameters ####
 
 source("R/library_importation.R")
