@@ -1,19 +1,43 @@
-generate_figure_3 <- function(dt_cases, ref_breaks, categ){
+#' Title Generate figure 3
+#'
+#' @param dt_cases: Data table, Reference dataset of epidemiological features for each case, 
+#' included their State and onset date (Date)
+#' @param ref_breaks: Vector, Breaks for map categories
+#'
+#' @return
+#' @export
+#'
+#' @examples
+generate_figure_3 <- function(dt_cases, ref_breaks){
+  # Names heatmap categories
+  categ <- sapply(1:(length(ref_breaks)-1), function(X){
+    if((X + 1) == length(ref_breaks))
+      return(paste0(as.character(ref_breaks[X]), "+"))
+    if(ref_breaks[X+1] == (ref_breaks[X] + 1))
+      return(as.character(ref_breaks[X]))
+    else 
+      return(paste0(as.character(ref_breaks[X]), "-",
+                    as.character(ref_breaks[X+1])))
+  })
+  
+  # Generate data table with the name and abbreviations of every American state
   data(state, package = "datasets")
   dt_map_cases <- data.table(abb = c(state.abb, "COL"))
   dt_map_cases[, region := tolower(c(state.name, "district of columbia"))]
   setkey(dt_map_cases, abb)
+  # Number of cases per state
   dt_map_cases[, cases := 0]
   dt_map_cases[names(table(dt_cases$State)),
                cases := as.numeric(table(dt_cases$State))]
   dt_map_cases <- dt_map_cases[region != "alaska",]
   dt_map_cases <- dt_map_cases[region != "hawaii",]
   
+  # Geo data of each state
   all_states <- map_data("state")
   Total <- merge(all_states, dt_map_cases, by="region")
   Total <- Total %>% mutate(category=cut(cases, breaks=ref_breaks,
                                          include.lowest = T, labels=categ))
-  
+  # Generate map
   p <- ggplot(Total, aes(x=Total$long, y=Total$lat))
   p <- p + geom_polygon(data=Total, aes(group = group, fill = Total$category),
                         color="black") +
@@ -25,7 +49,7 @@ generate_figure_3 <- function(dt_cases, ref_breaks, categ){
   P1 <- P1 + scale_y_continuous(breaks=c()) + scale_x_continuous(breaks=c()) + 
     theme(panel.border =  element_blank(), legend.text=element_text(size=20), 
           legend.title = element_text(size = 18), title = element_text(size = 20))
-  
+  # Annual number of cases
   P2 <- ggplot(dt_cases, aes(x = year(dt_cases$Date))) +
     geom_histogram(colour = NA, binwidth = 1)
   P2 <- P2 + theme_classic() + theme(axis.title = element_text(size = 18),
@@ -44,8 +68,10 @@ generate_figure_3 <- function(dt_cases, ref_breaks, categ){
 #' scenario to be displayed on the histogram
 #' @param list_fig_heatmap list of output list for prepare_for_figure(), for every
 #' scenario to be displayed on the heatmaps
-#'
-#' @export
+#' @param ref Logical value whether the last element of fig_hist_list is the reference 
+#' dataset (if TRUE, CIs are not plotted for this element)
+#' 
+##' @export
 #'
 #' @examples
 generate_figure_4_5 <- function(fig_hist_list, list_fig_heatmap, ref = T){
@@ -193,14 +219,25 @@ of cases")
 
 #' Title: Generate Figure 5
 #'
-#' @param list_factor_import 
-#' @param ref_breaks 
-#' @param categ 
+#' @param list_factor_import: List of data frames showing the number of subsequent 
+#' cases per import at each iteration in the different runs.
+#' @param ref_breaks: Vector, Breaks for map categories
 #'
 #' @export
 #'
 #' @examples
-generate_figure_6 <- function(list_factor_import, ref_breaks, categ){
+generate_figure_6 <- function(list_factor_import, ref_breaks){
+  # Names heatmap categories
+  categ <- sapply(1:(length(ref_breaks)-1), function(X){
+    if((X + 1) == length(ref_breaks))
+      return(paste0(as.character(ref_breaks[X]), "+"))
+    if(ref_breaks[X+1] == (ref_breaks[X] + 1))
+      return(as.character(ref_breaks[X]))
+    else 
+      return(paste0(as.character(ref_breaks[X]), "-",
+                    as.character(ref_breaks[X+1])))
+  })
+  
   ## Load data with all abbreviations and state names
   data(state, package = "datasets")
   dt_map_cases <- data.table(abb = c(state.abb, "COL"))
