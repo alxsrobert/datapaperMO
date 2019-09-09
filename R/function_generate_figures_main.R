@@ -61,7 +61,7 @@ generate_figure_3 <- function(dt_cases, ref_breaks){
   
 }
 
-#' Title: Generate Figure 3 / 4
+#' Title: Generate Figure 4 / 5
 #'
 #'
 #' @param fig_hist_list list of output list for prepare_for_figure(), for every
@@ -217,7 +217,7 @@ of cases")
   popViewport()
 }
 
-#' Title: Generate Figure 5
+#' Title: Generate Figure 6
 #'
 #' @param list_factor_import: List of data frames showing the number of subsequent 
 #' cases per import at each iteration in the different runs.
