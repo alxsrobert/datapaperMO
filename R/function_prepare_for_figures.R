@@ -4,8 +4,8 @@
 #' the inferred transmission chains, parameter estimates, generation numbers and 
 #' infection time for every case.
 #' 
-#' @param dt_cases: Data table. Epi description of the cases. Must contain: ID, 
-#' cluster, size_cluster and the import status for each case.
+#' @param dt_cases: Data table. Epi description of the cases. Must contain: the ID, 
+#' cluster, State, size_cluster and import status for each case.
 #' 
 #' @param burnin: Numeric: Length of the burnin period.
 #' 
