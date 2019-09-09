@@ -70,10 +70,9 @@ list_out <- list(out_import, out_005, out_09,
 supp_fig_param_estimate(list_out, burnin, sample_every)
 
 ## Distance transmission
-list_out <- list(out_ideal, out_005, out_005_wi)
+list_out <- list(out_import, out_005, out_005_wi)
 supp_fig_distance_transmission(list_out = list_out, burnin = burnin, 
-                               sample_every = sample_every, dt_cases = dt_cases,
-                               dt_distance = dt_distance)
+                               sample_every = sample_every, dt_cases = dt_cases)
 
 ## Sensitivity components of likelihood 
 fig_hist_list <- list(fig_no_like, fig_time, fig_time_gen, fig_time_age, fig_time_spa, fig_ref)
@@ -86,7 +85,7 @@ generate_figure_4_5(fig_hist_list, list_fig_heatmap)
 list_out <- list(out_import, out_005, out_005_wi)
 supp_fig_sec_overall(list_out, burnin, sample_every)
 # Stratified by state
-list_out <- list(out_ideal, out_005, out_005_wi)
+list_out <- list(out_import, out_005, out_005_wi)
 supp_fig_sec_map(list_out, dt_cases)
 
 
