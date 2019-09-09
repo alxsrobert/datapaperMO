@@ -36,8 +36,7 @@ source("R/load_analysis_likelihoods.R")
 source("R/load_analysis_genotype.R")
 ## Call function to generate figures 3
 ref_breaks <- c(1, 10, 50, 100, 500)
-categ <- c("1-10", "10-50", "50-100", "100-500")
-generate_figure_3(dt_cases, ref_breaks, categ)
+generate_figure_3(dt_cases, ref_breaks)
 
 ## Call function to generate figures 4 and 5
 fig_hist_list <- list(fig_import, fig_ref)
@@ -54,9 +53,8 @@ generate_figure_4_5(fig_hist_list, list_fig_heatmap)
 list_factor_import <- list(fig_005[["factor_import"]], fig_005_wi[["factor_import"]])
 ## Categories in figure 5
 ref_breaks <- c(0, 1, 3, 5, 10, 50)
-categ <- c("0-1", "1-3", "3-5", "5-10", "10+")
 
-generate_figure_6(list_factor_import, ref_breaks, categ)
+generate_figure_6(list_factor_import, ref_breaks)
 
 ## Figures in supplement
 list_out <- list(out_import, out_005, out_09,
