@@ -6,7 +6,7 @@ analysis of toy_outbreak dataset from the measlesoutbreaker package
 ```R
 install.packages("devtools")
 library(devtools)
-install.github("alxsrobert/measlesoutbreaker")
+install_github("alxsrobert/measlesoutbreaker")
 library(measlesoutbreaker)
 source("R/generate_figure.R")
 ```
