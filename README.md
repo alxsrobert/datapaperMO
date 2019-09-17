@@ -8,7 +8,7 @@ install.packages("devtools")
 library(devtools)
 install_github("alxsrobert/measlesoutbreaker")
 library(measlesoutbreaker)
-source("R/generate_figure.R")
+source("R/generate_figures.R")
 ```
 
 **List of files in the repository:**
