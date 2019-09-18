@@ -15,7 +15,6 @@ source("R/generate_figures.R")
 * In data: 
   * State_initials.csv	: Data table with state names and acronyms.
   * pop_center.csv: Population centroid and population of every county (Source: https://www.census.gov/geographies/reference-files/2010/geo/2010-centers-population.html (per state : UNITED STATES)).
-  * social_contact_uk.csv : Contact Matrix of contacts between age groups (Source: Social Contacts and Mixing Patterns Relevant to the Spread of Infectious Diseases)
 
 * In R:
   * library_importation.R: import libraries for analysis.

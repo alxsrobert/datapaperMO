@@ -30,9 +30,13 @@ f <- dgamma(x = 1:300, scale = 0.4286, shape = 26.834, log = T)
 #### Contact matrices ####
 
 # From Polymod
-polymod <- as.data.table(read.csv(file = "data/social_contact_UK.csv",
-                                  header = T, , colClasses = "numeric"))
-colnames(polymod) <- substr(x = colnames(polymod), start = 2, stop = nchar(colnames(polymod)))
+polymod_matrix <-
+  contact_matrix(polymod, countries="United Kingdom",
+                 age.limits=seq(0, 70, by=5), missing.contact.age="remove",
+                 estimated.contact.age="mean", missing.participant.age="remove")$matrix
+
+polymod <- as.data.table(t(polymod_matrix))
+colnames(polymod) <- sub("^\\[?([0-9]+)[,+]([0-9]+)?.*$", "\\1.\\2", colnames(polymod))
 #row <- age of contact
 #column <- age of participant
 polymod_prop <- apply(polymod, 2, function(X) 
