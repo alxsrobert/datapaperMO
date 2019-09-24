@@ -4,25 +4,29 @@ source("R/library_importation.R")
 source("R/function_generate_dataset.R")
 source("R/load_data_distributions.R")
 
-# If FALSE: Use data attached to measlesoutbreaker, if TRUE: generate the data
+
+#### Define parameters and generate dataset, or use default toy_outbreak dataset ####
+
+# If FALSE: Use the data attached to measlesoutbreaker, if TRUE: generate the data
 generate <- TRUE
 
 if(generate){
   # Set seed
   set.seed(1)
-  # Population per county
-  pop_county <- dt_distance[!duplicated(county1), pop_county1]
-  names(pop_county) <- dt_distance[!duplicated(county1), county1]
+  
   # Draw the r0 in each state, following an exponential distribution
   r0_state <- rexp(n = length(unique(dt_state_county$STNAME)), 
                    rate = 1.5)
   names(r0_state) <- unique(dt_state_county$STNAME)
   r0_state[r0_state>1] <- 0.95
+  
   # Spatial parameters
   a <- 0.84
   b <- 0.08
+  
   # Spatial threshold
   gamma <- 100
+  
   # Maximum number of cases in the generated dataset
   nb_cases <- 1000
   

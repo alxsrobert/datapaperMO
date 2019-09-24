@@ -113,3 +113,6 @@ dt_population <- dt_distance[!duplicated(county1), .(county1, pop_county1)]
 colnames(dt_population) <- c("county", "population")
 
 
+# Vector population per county
+pop_county <- dt_distance[!duplicated(county1), pop_county1]
+names(pop_county) <- dt_distance[!duplicated(county1), county1]
