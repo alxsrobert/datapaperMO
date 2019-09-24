@@ -11,7 +11,7 @@ library(measlesoutbreaker)
 source("R/generate_figures.R")
 ```
 
-**To generate a new simulated dataset with different input parameters (number of cases, R0, spatial parameters...), edit the lines 10-37 in analysis_generated_data.R. Run the rest of the script to generate the measlesoutbreaker runs on the dataset.**
+**To generate a new simulated dataset with different input parameters (number of cases, R0, spatial parameters...), edit the lines 8-40 in analysis_generated_data.R. Run the rest of the script to generate the measlesoutbreaker runs on the dataset.**
 
 **List of files in the repository:**
 * In data: 
