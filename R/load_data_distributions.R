@@ -29,6 +29,8 @@ f <- dgamma(x = 1:300, scale = 0.4286, shape = 26.834, log = T)
 
 #### Contact matrices ####
 
+if(exists("polymod"))
+  rm(polymod)
 # From Polymod
 polymod_matrix <-
   contact_matrix(polymod, countries="United Kingdom",
