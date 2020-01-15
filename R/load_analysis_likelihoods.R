@@ -97,7 +97,7 @@ fig_time_age <- prepare_for_figures(out = out_time_age, dt_cases = dt_cases, bur
                                     thresh_barplot = thresh_barplot, diff = diff)
 
 ## time, genotype and sex
-out_time_spa <- readRDS(file = "toy_outbreak_runs/with_import.rds")
+out_time_spa <- readRDS(file = "toy_outbreak_runs/import_time_genotype_space.rds")
 fig_time_spa <- prepare_for_figures(out = out_time_spa, dt_cases = dt_cases, 
                                     burnin = burnin, sample_every = sample_every, 
                                     max_clust = max_clust,

@@ -18,8 +18,6 @@
 // In all these functions, 'SEXP i' is an optional vector of case indices, on
 // the 1:N scale.
 
-
-
 //  This function compute the spatial log likelihood distribution from parameters a 
 //  and b
 
@@ -134,4 +132,3 @@ Rcpp::List cpp_stouffer_move_a(Rcpp::List param, Rcpp::List data, Rcpp::List con
   
   return new_param;
 }
-
