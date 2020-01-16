@@ -82,7 +82,7 @@ Rcpp::List cpp_stouffer_move_a(Rcpp::List param, Rcpp::List data, Rcpp::List con
   Rcpp::List new_param = clone(param);
   double gamma = config["gamma"];
   
-  Rcpp::IntegerVector postcode = data["postcode"];
+  Rcpp::IntegerVector region = data["region"];
   Rcpp::NumericMatrix distance = data["distance"];
   Rcpp::NumericVector population = data["population"];
   Rcpp::NumericVector limits = config["prior_a"];
