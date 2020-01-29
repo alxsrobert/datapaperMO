@@ -18,11 +18,13 @@
 // In all these functions, 'SEXP i' is an optional vector of case indices, on
 // the 1:N scale.
 
+
+
 //  This function compute the spatial log likelihood distribution from parameters a 
 //  and b
 
-Rcpp::List cpp_stouffer_matrix(Rcpp::NumericVector population,
-                               Rcpp::NumericMatrix distance, double a, 
+Rcpp::List cpp_stouffer_matrix(Rcpp::NumericVector population, Rcpp::NumericMatrix distance,
+                               Rcpp::NumericMatrix ances, double a, 
                                double gamma, int nb_cases) {
   
   int size_pop = population.size();
@@ -32,45 +34,65 @@ Rcpp::List cpp_stouffer_matrix(Rcpp::NumericVector population,
   // log_s_dens with one missing generation
   Rcpp::NumericMatrix probs2(nb_cases, nb_cases);
   Rcpp::NumericVector sum_pop(size_pop);
-  Rcpp::NumericMatrix distance_a(size_pop, size_pop);
+  Rcpp::NumericMatrix nb_move(size_pop, size_pop);
+  double thresh_probs = 0.0;
+  if(size_pop <1000) thresh_probs = 0.000001;
+  else if(size_pop <3000) thresh_probs = 0.00001;
   
   int j, k, l;
   for(k = 0; k<size_pop; k++){
     population_a[k] = pow(population[k], a);
   }
-  // printf("YO2\n");
+
   for(k = 0; k < size_pop; k++){
-    for(l = 0; l < (k + 1); l++){
-      if(distance(k,l) >= 0){
-        distance_a(k,l) = pow(distance(k,l), a);
-        sum_pop[l] += population_a[k]/distance_a(k, l);
-        if(k != l){
-          distance_a(l,k) = distance_a(k,l);
-          sum_pop[k] += population_a[l]/distance_a(l, k);
+    for(j = 0; j < size_pop; j++){
+      if(distance(k,j) < gamma){
+        nb_move(k,j) = population_a[k]/pow(distance(k,j), a);
+        sum_pop[j] += nb_move(k,j);
+        if(k != j){
+          nb_move(j,k) = nb_move(k,j) * population_a[j]/population_a[k];
+          sum_pop[k] += nb_move(j,k);
+        }
+      }
+    }
+    for(j = 0; j<size_pop; j++){
+      if(distance(k,j) <= gamma){
+        if(k < nb_cases && j < nb_cases){
+          probs(j, k) = nb_move(j, k)/sum_pop[k];
+        }
+        else nb_move(j, k) = nb_move(j, k) / sum_pop[k];
+      }
+    }
+  }
+  for(k = 0; k<nb_cases; k++){
+    for(j = 0; j<nb_cases; j++){
+      if(ances(k, j) == 1 && distance(k,j) <= gamma){
+        for(l = 0; l < size_pop; l++){
+          if(l < nb_cases){
+            if((probs(k, l) * probs(l, j)) > thresh_probs &&
+               distance(k, l) <= gamma && distance(l, j) <= gamma)
+              probs2(k,j) += probs(k, l) * probs(l, j);
+          }
+          else
+            if((nb_move(k, l) * nb_move(l, j)) > thresh_probs &&
+               distance(k, l) <= gamma && distance(l, j) <= gamma)
+              probs2(k,j)  += nb_move(k, l) * nb_move(l, j);
         }
       }
     }
   }
   for(k = 0; k<nb_cases; k++){
     for(j = 0; j<nb_cases; j++){
-      if(distance(j,k) >= 0){
-        probs(j, k) = (population_a[j] / distance_a(j,k))/sum_pop[k];
+      if(ances(k, j) == 1 && distance(k,j) <= gamma){
+        probs2(j, k) = log(probs2(j, k));
         probs(j, k) = log(probs(j, k));
-        probs2(j, k) = 0;
-        for(l = 0; l<size_pop; l++){
-          if(distance(j,l) >= 0 && distance(l, k) >= 0){
-          probs2(j, k) += (population_a[j] * population_a[l])/
-            (distance_a(j,l) * sum_pop[k] * distance_a(l,k) * sum_pop[l]);
-          }
-        }
-        probs2(j,k) = log(probs2(j, k));
-      } else{
-        probs(j,k) = -1000;
-        probs2(j,k) = -1000;        
+      } else if(distance(k,j) > gamma){
+        probs2(j, k) = -1000;
+        probs(j, k) = -1000;
       }
     }
   }
-
+  
   Rcpp::List new_log_s_dens = Rcpp::List::create(probs, probs2);
   
   return(new_log_s_dens);
@@ -86,7 +108,7 @@ Rcpp::List cpp_stouffer_move_a(Rcpp::List param, Rcpp::List data, Rcpp::List con
   Rcpp::NumericMatrix distance = data["distance"];
   Rcpp::NumericVector population = data["population"];
   Rcpp::NumericVector limits = config["prior_a"];
-  
+  Rcpp::NumericMatrix can_be_ances_reg = data["can_be_ances_reg"];
   Rcpp::List new_log_s_dens = new_param["log_s_dens"];
   
   Rcpp::NumericVector new_a = new_param["a"]; // these are just pointers
@@ -107,8 +129,8 @@ Rcpp::List cpp_stouffer_move_a(Rcpp::List param, Rcpp::List data, Rcpp::List con
     return param;
   }
   // printf("YO1\n");
-  new_param["log_s_dens"] = cpp_stouffer_matrix(population, distance, new_a[0],
-                                      gamma, nb_cases);
+  new_param["log_s_dens"] = cpp_stouffer_matrix(population, distance, can_be_ances_reg,
+                                      new_a[0], gamma, nb_cases);
   // printf("YO2\n");
   // compute likelihoods
   old_logpost = measlesoutbreaker::cpp_ll_space(data, config, param, R_NilValue, custom_ll);
@@ -132,3 +154,4 @@ Rcpp::List cpp_stouffer_move_a(Rcpp::List param, Rcpp::List data, Rcpp::List con
   
   return new_param;
 }
+

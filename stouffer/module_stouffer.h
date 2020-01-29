@@ -5,8 +5,8 @@
 #include <Rmath.h>
 
 // [[Rcpp::export()]]
-Rcpp::List cpp_stouffer_matrix(Rcpp::NumericVector population,
-                               Rcpp::NumericMatrix distance, double a, 
+Rcpp::List cpp_stouffer_matrix(Rcpp::NumericVector population, Rcpp::NumericMatrix distance,
+                               Rcpp::NumericMatrix ances, double a, 
                                double gamma, int nb_cases);
 // [[Rcpp::export()]]
 Rcpp::List cpp_stouffer_move_a(Rcpp::List param, Rcpp::List data, Rcpp::List config,
