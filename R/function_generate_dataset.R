@@ -57,7 +57,8 @@ new_case <- function(sec, date_index, county_index, age_group_index, genotype_in
 #' @param a double first spatial parameter (population).
 #' @param b double second spatial parameter (distance).
 #' @param gamma double distance threshold.
-#' @param dt_distance data table of the distance between counties.
+#' @param dt_distance data table of the distance between counties (Column names: 
+#' county1, county2, distance_km, pop_county1, pop_county2, long1, long2, lat1, lat2)
 #' @param polymod_prop Matrix of proportion of contacts between age groups.
 #' @param w Vector of the serial interval of the disease.
 #' @param nb_cases integer maximum number of cases to be generated.
@@ -152,21 +153,9 @@ generate_dataset <- function(a, b, gamma, dt_distance,
   gen_reported <- runif(nrow(dt_cases), 0, 1)
   dt_cases[gen_reported > prop_gen, Genotype := "Not attributed"]
   
-  ## Save the distance matrix used to generate dt_cases
-  dt_distance <- dt_distance[,.(county1, county2, distance_km)]
-  setkey(dt_distance, county1)
-  # Generate the distance matrix from the distance data table 
-  distance_matrix <- sapply(unique(dt_distance$county1), 
-                            function(X){
-    return(dt_distance[county2 == X][, distance_km])
-  })
-  rownames(distance_matrix) <- colnames(distance_matrix)
-  # Vect_pop: Vector of population per county
-  vect_pop <- pop_county
-  names(vect_pop) <- names(pop_county)
-  vect_pop <- vect_pop[rownames(distance_matrix)]
+  dt_regions <- dt_distance[!duplicated(county1), .(region = county1, population = pop_county1,
+                                                    long = long1, lat = lat1)]
   
-  toy_outbreak <- list(cases = dt_cases, distance = distance_matrix,
-                        population = vect_pop, age_contact = polymod_prop)
+  toy_outbreak <- list(cases = dt_cases, dt_regions = dt_regions, age_contact = polymod_prop)
   return(toy_outbreak)
 }

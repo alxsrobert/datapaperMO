@@ -9,8 +9,14 @@ source("R/function_supplement_figures.R")
 dt_cases <- toy_outbreak[["cases"]]
 dt_cases <- dt_cases[order(Date), ]
 dt_cases[, size_cluster := table(cluster)[cluster]]
-dist_mat <- toy_outbreak[["distance"]]
-pop_vect <- toy_outbreak[["population"]]
+dt_regions <- toy_outbreak[["dt_regions"]]
+all_dist <- distGeo(matrix(c(rep(dt_regions$long, nrow(dt_regions)), 
+                             rep(dt_regions$lat, nrow(dt_regions))), ncol = 2), 
+                    matrix(c(rep(dt_regions$long, each = nrow(dt_regions)), 
+                             rep(dt_regions$lat, each = nrow(dt_regions))), ncol = 2))
+
+dist_mat <- matrix(all_dist/1000, nrow = nrow(dt_regions))
+pop_vect <- dt_regions$population
 age_contact <- toy_outbreak[["age_contact"]]
 
 burnin <- 10000
