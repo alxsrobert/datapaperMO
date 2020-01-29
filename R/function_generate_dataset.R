@@ -88,7 +88,7 @@ generate_dataset <- function(a, b, gamma, dt_distance,
                             .SDcols = "nb_commut"]
   setkey(sum_commut, county2)
   dt_distance[, probs := nb_commut / sum_commut[county2,nb_commut]]
-  
+  setkey(dt_state_county, ID_COUNTY)
   # Initialize dt_cases
   dt_cases <- data.table(NULL)
   count <- 1
@@ -120,7 +120,7 @@ generate_dataset <- function(a, b, gamma, dt_distance,
                           "age_group", "import", "cluster", "generation")
     dt_cases <- rbind(dt_cases, case_i)
     count <- dim(dt_cases)[1]
-    while(count<= dim(dt_cases)[1]){
+    while(count<= dim(dt_cases)[1] & dim(dt_cases)[1] < nb_cases){
       # Extract features of index and county
       date_i <- dt_cases[count, Date]
       county_i <- dt_cases[count, county]
@@ -132,6 +132,7 @@ generate_dataset <- function(a, b, gamma, dt_distance,
       # Draw number of new cases
       new_cases_i <- rpois(1, r0_i)
       count <- count + 1
+      
       if(new_cases_i > 0){
         # Generate the features of the cases infected by the index
         case_subs <- new_case(sec = new_cases_i, date_index = date_i, 
