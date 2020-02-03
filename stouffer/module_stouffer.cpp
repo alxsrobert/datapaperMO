@@ -1,9 +1,9 @@
-// [[Rcpp::depends(measlesoutbreaker)]]
+// [[Rcpp::depends(o2geosocial)]]
 
 #include <Rcpp.h>
 #include <Rmath.h>
 #include "module_stouffer.h"
-#include "measlesoutbreaker.h"
+#include "o2geosocial.h"
 
 // IMPORTANT: ON INDEXING VECTORS AND ANCESTRIES
 
@@ -133,13 +133,13 @@ Rcpp::List cpp_stouffer_move_a(Rcpp::List param, Rcpp::List data, Rcpp::List con
                                       new_a[0], gamma, nb_cases);
   // printf("YO2\n");
   // compute likelihoods
-  old_logpost = measlesoutbreaker::cpp_ll_space(data, config, param, R_NilValue, custom_ll);
-  new_logpost = measlesoutbreaker::cpp_ll_space(data, config, new_param, R_NilValue, custom_ll);
+  old_logpost = o2geosocial::cpp_ll_space(data, config, param, R_NilValue, custom_ll);
+  new_logpost = o2geosocial::cpp_ll_space(data, config, new_param, R_NilValue, custom_ll);
   
   // compute priors
   
-  old_logpost += measlesoutbreaker::cpp_prior_a(param, config, custom_prior);
-  new_logpost += measlesoutbreaker::cpp_prior_a(new_param, config, custom_prior);
+  old_logpost += o2geosocial::cpp_prior_a(param, config, custom_prior);
+  new_logpost += o2geosocial::cpp_prior_a(new_param, config, custom_prior);
   // acceptance term
   
   p_accept = exp(new_logpost - old_logpost);

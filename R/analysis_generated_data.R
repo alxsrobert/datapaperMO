@@ -1,4 +1,4 @@
-## Generate all measlesoutbreaker runs on simulated dataset (toy_outbreak)
+## Generate all o2geosocial runs on simulated dataset (toy_outbreak)
 
 source("R/library_importation.R")
 source("R/function_generate_dataset.R")
@@ -7,7 +7,7 @@ source("R/load_data_distributions.R")
 
 #### Define parameters and generate dataset, or use default toy_outbreak dataset ####
 
-# If FALSE: Use the data attached to measlesoutbreaker, if TRUE: generate the data
+# If FALSE: Use the data attached to o2geosocial, if TRUE: generate the data
 generate <- TRUE
 
 if(generate){
@@ -21,7 +21,7 @@ if(generate){
   r0_state[r0_state>1] <- 0.95
   
   # Spatial parameters
-  a <- 0.84
+  c <- 0.84
   b <- 0.08
   
   # Spatial threshold
@@ -30,7 +30,7 @@ if(generate){
   # Maximum number of cases in the generated dataset
   nb_cases <- 1000
   
-  toy_outbreak <- generate_dataset(a = a, b = b, gamma = gamma, 
+  toy_outbreak <- generate_dataset(b = b, c = c, gamma = gamma, 
                                    dt_distance = dt_distance,
                                    polymod_prop = polymod_prop, w = w, 
                                    nb_cases = nb_cases, r0_state = r0_state, 
@@ -54,12 +54,13 @@ dist_mat <- matrix(all_dist/1000, nrow = nrow(dt_regions))
 pop_vect <- dt_regions$population
 age_contact <- toy_outbreak[["age_contact"]]
 
+names(pop_vect) <- rownames(dist_mat) <- colnames(dist_mat) <- dt_regions$region
 
 f_null <- function(data, param) {
   return(0.0)
 }
 
-#### measlesoutbreaker analysis toy data: threshold and import ####
+#### o2geosocial analysis toy data: threshold and import ####
 
 ## No import, threshold = 0.01
 data <- outbreaker_data(dates = dt_cases$Date,
@@ -86,12 +87,11 @@ config <- create_config(data = data,
                         outlier_threshold = 0.01, 
                         outlier_relative = FALSE,
                         n_iter_import = 30000, 
-                        sample_every_import = 50, 
+                        sample_every_import = 50, verbatim = TRUE,
                         burnin = 10000)
 priors <- custom_priors()
 likelihoods <- custom_likelihoods()
 moves <- custom_moves()
-
 out <- outbreaker(data = data,config = config,priors = priors,
                   likelihoods = likelihoods,moves = moves)
 
@@ -160,7 +160,7 @@ out <- outbreaker(data = data,config = config,priors = priors,
                   likelihoods = likelihoods,moves = moves)
 saveRDS(out, file = "toy_outbreak_runs/with_import_095.rds")
 
-#### measlesoutbreaker analysis toy data: elements of likelihood ####
+#### o2geosocial analysis toy data: elements of likelihood ####
 
 
 ## Import, no likelihood
@@ -264,7 +264,7 @@ out <- outbreaker(data = data,config = config,priors = priors,
 saveRDS(out, file = paste0("toy_outbreak_runs/import_time_genotype_age.rds"))
 
 
-#### measlesoutbreaker analysis toy data: Different genotype report rate ####
+#### o2geosocial analysis toy data: Different genotype report rate ####
 
 # Set seed
 set.seed(1)

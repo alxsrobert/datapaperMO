@@ -74,7 +74,7 @@ fig_sim <- list(med_size_cluster_barplot = size_cluster_ref_barplot,
                 med_prop_singletons = size_cluster_ref_barplot,
                 med = med_ref)
 
-#### Load measlesoutbreaker runs ####
+#### Load o2geosocial runs ####
 
 ## Inference with absolute threshold (k = 0.05) when no cases was genotyped
 out_no_gen_sim <- readRDS(file = "toy_outbreak_runs/no_import_thresh005_no_gen.rds")

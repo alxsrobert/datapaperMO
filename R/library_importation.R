@@ -1,7 +1,7 @@
-## Packages needed to generate and analyse measlesoutbreaker runs
+## Packages needed to generate and analyse o2geosocial runs
 
 library(data.table)
-library(measlesoutbreaker)
+library(o2geosocial)
 library(geosphere)
 library(dplyr)
 library(Rcpp)

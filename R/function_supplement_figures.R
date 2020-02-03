@@ -57,7 +57,7 @@ supp_fig_eval_cluster <- function(list_fig, titles){
   
 }
 
-#' Title: median values and quantiles of the parameters estimated in measlesoutbreaker
+#' Title: median values and quantiles of the parameters estimated in o2geosocial
 #'
 #' @param list_out: List, List of outbreaker runs
 #' @param burnin: Numeric, Burnin period

@@ -23,10 +23,10 @@
 #' @examples
 new_case <- function(sec, date_index, county_index, age_group_index, genotype_index, 
                      count, cluster, generation, dt_distance, 
-                     polymod_prop, w, dt_state_county){
+                     polymod_prop, w, dt_state_county, ID){
   # Draw new cases' county
-  county_k <- sample(dt_distance[county2 == county_index, county1], sec, 
-                     prob = dt_distance[county2 == county_index, probs], 
+  county_k <- sample(dt_distance[county1 == county_index, county2], sec, 
+                     prob = dt_distance[county1 == county_index, probs], 
                      replace = T)
   # Draw new cases' age
   age_group_k <- sample(1:15, size = sec, prob = polymod_prop[, age_group_index],
@@ -45,16 +45,17 @@ new_case <- function(sec, date_index, county_index, age_group_index, genotype_in
                        age_group_k, 
                        rep(FALSE, sec), 
                        cluster, 
-                       generation + 1)
+                       generation + 1, 
+                       as.character(ID))
   colnames(case_k) <- c("ID", "State", "Date", "Genotype", "county", "age_group", 
-                        "import", "cluster", "generation")
+                        "import", "cluster", "generation", "infector_ID")
   
   return(case_k)
 }
 
 #' Title: Generate dataset
 #'
-#' @param a double first spatial parameter (population).
+#' @param c double first spatial parameter (population).
 #' @param b double second spatial parameter (distance).
 #' @param gamma double distance threshold.
 #' @param dt_distance data table of the distance between counties (Column names: 
@@ -75,33 +76,32 @@ new_case <- function(sec, date_index, county_index, age_group_index, genotype_in
 #' @export
 #'
 #' @examples
-generate_dataset <- function(a, b, gamma, dt_distance, 
+generate_dataset <- function(b, c, gamma, dt_distance, 
                              polymod_prop, w, nb_cases, r0_state, pop_county, 
                              t_min, t_max, dt_state_county, prop_gen = 0.4){
   ## Compute the probability of connection between counties using gravity model
   # Number of connections
-  dt_distance[, nb_commut := pop_county1**a*exp(-distance_km*b)]
+  dt_distance[, nb_commut := (pop_county2**c)*exp(-distance_km*b)]
   # If the distance is above the threshold gamma, we consider the two counties are not 
   # connected
   dt_distance[distance_km > gamma, nb_commut := 0]
   # Calculate the proportion of connections between counties
-  sum_commut <- dt_distance[, lapply(.SD,sum), by = county2,
+  sum_commut <- dt_distance[, lapply(.SD,sum), by = county1,
                             .SDcols = "nb_commut"]
-  setkey(sum_commut, county2)
-  dt_distance[, probs := nb_commut / sum_commut[county2,nb_commut]]
+  setkey(sum_commut, county1)
+  dt_distance[, probs := nb_commut / sum_commut[county1,nb_commut]]
   setkey(dt_state_county, ID_COUNTY)
   # Initialize dt_cases
   dt_cases <- data.table(NULL)
   count <- 1
   i <- 1
-  
   while(dim(dt_cases)[1] < nb_cases){
     # Draw the infection date of the ancestors
     date_i <- sample(x = t_min:t_max, size = 1)
     date_i <- as.Date(date_i, origin = "1970-01-01")
     # Draw the county of the ancestors
     county_i <- sample(x =names(pop_county), size = 1, 
-                     prob = pop_county/sum(pop_county))
+                       prob = pop_county/sum(pop_county))
     # Draw the age of the ancestors
     age_group_i <- ceiling(rexp(n = 1, rate = 0.2))
     if(age_group_i>dim(polymod_prop)[2]) age_group_i <- dim(polymod_prop)[2]
@@ -116,9 +116,9 @@ generate_dataset <- function(a, b, gamma, dt_distance,
     # Merge all the features and add the ancestor to dt_cases
     case_i <- data.table(as.character(count), dt_state_county[county_i, STNAME],
                          date_i, genotype_i, county_i, age_group_i, TRUE, clust_i,
-                         gen)
+                         gen, NA)
     colnames(case_i) <- c("ID", "State", "Date", "Genotype", "county", 
-                          "age_group", "import", "cluster", "generation")
+                          "age_group", "import", "cluster", "generation", "infector_ID")
     dt_cases <- rbind(dt_cases, case_i)
     count <- dim(dt_cases)[1]
     while(count<= dim(dt_cases)[1] & dim(dt_cases)[1] < nb_cases){
@@ -130,6 +130,7 @@ generate_dataset <- function(a, b, gamma, dt_distance,
       clust_i <- dt_cases[count, cluster]
       r0_i <- r0_state[dt_state_county[county_i, STNAME]]
       gen_i <- dt_cases[count, generation]
+      ID_i <- dt_cases[count, ID]
       # Draw number of new cases
       new_cases_i <- rpois(1, r0_i)
       count <- count + 1
@@ -139,11 +140,11 @@ generate_dataset <- function(a, b, gamma, dt_distance,
         case_subs <- new_case(sec = new_cases_i, date_index = date_i, 
                               county_index = county_i, 
                               age_group_index = age_group_i, 
-                              genotype_index = genotype_i, count = count, 
+                              genotype_index = genotype_i, count = nrow(dt_cases) + 1, 
                               cluster = clust_i, generation = gen_i, 
                               dt_distance = dt_distance,
                               dt_state_county = dt_state_county,
-                              polymod_prop = polymod_prop, w = w)
+                              polymod_prop = polymod_prop, w = w, ID = ID_i)
         dt_cases <- rbind(dt_cases, case_subs)
       }
     }

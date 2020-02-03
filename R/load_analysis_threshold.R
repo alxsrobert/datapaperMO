@@ -1,4 +1,4 @@
-## Load measlesoutbreaker runs comparing the impact of the import threshold lambda 
+## Load o2geosocial runs comparing the impact of the import threshold lambda 
 #### Load libraries and parameters ####
 
 source("R/library_importation.R")
@@ -74,7 +74,7 @@ fig_ref <- list(med_size_cluster_barplot = size_cluster_ref_barplot,
                 med_prop_singletons = size_cluster_ref_barplot,
                 med = med_ref)
 
-#### Load measlesoutbreaker runs ####
+#### Load o2geosocial runs ####
 
 ## threshold 001
 out_001 <- readRDS(file = "toy_outbreak_runs/no_import_thresh001.rds")

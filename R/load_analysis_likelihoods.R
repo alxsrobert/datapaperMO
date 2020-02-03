@@ -73,7 +73,7 @@ fig_ref <- list(med_size_cluster_barplot = size_cluster_ref_barplot,
                 med_prop_singletons = size_cluster_ref_barplot,
                 med = med_ref)
 
-#### Load measlesoutbreaker runs ####
+#### Load o2geosocial runs ####
 
 ## no_like
 out_no_like <- readRDS(file = "toy_outbreak_runs/import_no_like.rds")
