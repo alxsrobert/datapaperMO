@@ -39,7 +39,7 @@
 #' @examples
 prepare_for_figures <- function(out, dt_cases, burnin, sample_every, 
                                 max_clust, thresh_barplot, diff){
-  # Barplot names
+  # Generate barplot names from the breaks in thresh_barplot
   names_barplot <- sapply(1:length(thresh_barplot), function(X){
     if((X + 1) > length(thresh_barplot))
       return(paste0(as.character(thresh_barplot[X]), "+"))
@@ -50,9 +50,8 @@ prepare_for_figures <- function(out, dt_cases, burnin, sample_every,
                     as.character(thresh_barplot[X+1] - 1)))
   })
   # Groups_barplot: Correspondence cluser size and group (1 => Group 1; 2 => G2; 3,4 =>G3)
-  groups_barplot <- sapply(1:max_clust, function(X){
-    return(max(which(thresh_barplot <= X)))
-  })
+  groups_barplot <- sapply(1:max_clust, function(X) return(max(which(thresh_barplot <= X))))
+  
   
   # Breaks for sensitivity and precision vectors
   sensitivity <- seq(diff/2, 1 - diff/2, diff)
