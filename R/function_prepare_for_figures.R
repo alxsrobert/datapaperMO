@@ -147,8 +147,8 @@ prepare_for_figures <- function(out, dt_cases, burnin, sample_every,
   
   clust_matrix_nb <- gsub(pattern = "alpha_", replacement = "", 
                           clust_matrix)
-  names(clust_matrix_nb) <- gsub(pattern = "alpha_", replacement = "", 
-                                 names(clust_matrix))
+  colnames(clust_matrix_nb) <- gsub(pattern = "alpha_", replacement = "", 
+                                    colnames(clust_matrix))
   # Which cases are not singletons
   not_singletons <- which(dt_cases$size_cluster>1)
   # Proportion of the reference cluster in the inferred cluster

@@ -122,10 +122,8 @@ generate_figure_4_5 <- function(fig_hist_list, list_fig_heatmap, ref = T){
                                if(!is.null(X$low))
                                  return(as.data.frame(t(X$low))))
   low_imports <- bind_rows(low_imports_list) %>% as.matrix
-
   ## Plot is mixing base plot and ggplot so need to use Viewport
   plot.new()
-  grid.newpage()
   pushViewport(viewport(layout = grid.layout(nrow = 2, ncol = 1)))
   
   ## First: Histograms

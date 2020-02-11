@@ -310,12 +310,9 @@ supp_fig_sec_overall <- function(list_out, burnin, sample_every){
       oma = c(0,1,0,0), cex.axis=1.2, cex.main=1.5, #b l t r
       mar = c(3,3,0,1) + 1.3, las=1, bty="l", tcl=-1, lwd=2,
       mgp = c(3, 1.2, 0))
-  b <- barplot(med_sec, 
-               col = grey.colors(nrow(med_sec)),
-               beside = T, 
-               ylim = c(0, max(up_sec)),
-               xlab = "Number of secondary cases", ylab = "Proportion", 
-               border = NA)
+  b <- barplot(med_sec, col = grey.colors(nrow(med_sec)), beside = T, 
+               ylim = c(0, max(up_sec)), xlab = "Number of secondary cases", 
+               ylab = "Proportion", border = NA)
   arrows(x0 = b, y0 = low_sec, x1 = , y1 = up_sec, angle = 90, code = 3,
          length = 0.1)
 
@@ -344,7 +341,7 @@ supp_fig_sec_map <- function(list_out, dt_cases){
   dt_map_r0[, r0 := 0]
   dt_map_r0 <- dt_map_r0[region != "alaska",]
   dt_map_r0 <- dt_map_r0[region != "hawaii",]
-  
+
   # Generate the median number of secondary cases per state per element of list_out
   dt_map_r0_list <- lapply(list_out, function(out_X){
     # Who infected whom matrix
@@ -359,7 +356,7 @@ supp_fig_sec_map <- function(list_out, dt_cases){
       X <- factor(X, levels = names(X))
       tab_X <- table(X)
       dt_test <- dt_cases
-      dt_test[, sec := tab_X]
+      dt_test[, sec := as.numeric(tab_X)]
       dt_test <- dt_test[, .(State, sec)]
       dt_test <- dt_test[, lapply(.SD, sum), by = State]
       nb_sec <- dt_test$sec
