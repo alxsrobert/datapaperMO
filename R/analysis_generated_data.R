@@ -1,11 +1,11 @@
-## Generate all o2geosocial runs on simulated dataset (toy_outbreak)
+## Generate all o2geosocial runs on simulated dataset (toy_outbreak_long)
 
 source("R/library_importation.R")
 source("R/function_generate_dataset.R")
 source("R/load_data_distributions.R")
 
 
-#### Define parameters and generate dataset, or use default toy_outbreak dataset ####
+#### Define parameters and generate dataset, or use default toy_outbreak_long dataset ####
 
 # If FALSE: Use the data attached to o2geosocial, if TRUE: generate the data
 generate <- TRUE
@@ -18,33 +18,35 @@ if(generate){
   r0_state <- rexp(n = length(unique(dt_state_county$STNAME)), 
                    rate = 1.5)
   names(r0_state) <- unique(dt_state_county$STNAME)
-  r0_state[r0_state>1] <- 0.95
+  r0_state[r0_state>1] <- 0.9
   
   # Spatial parameters
   c <- 0.84
-  b <- 0.08
+  b <- 0.14
   
   # Spatial threshold
   gamma <- 100
   
   # Maximum number of cases in the generated dataset
-  nb_cases <- 1000
+  nb_cases <- 2200
   
-  toy_outbreak <- generate_dataset(b = b, c = c, gamma = gamma, 
-                                   dt_distance = dt_distance,
-                                   polymod_prop = polymod_prop, w = w, 
-                                   nb_cases = nb_cases, r0_state = r0_state, 
-                                   pop_county = pop_county, 
-                                   dt_state_county = dt_state_county,
-                                   t_min = as.Date("2010-01-01"), 
-                                   t_max = as.Date("2016-01-01")) 
+  toy_outbreak_long <- generate_dataset(b = b, c = c, gamma = gamma, 
+                                        dt_distance = dt_distance,
+                                        polymod_prop = polymod_prop, w = w, 
+                                        nb_cases = nb_cases, r0_state = r0_state, 
+                                        pop_county = pop_county, 
+                                        dt_state_county = dt_state_county,
+                                        t_min = as.Date("2003-01-01"), 
+                                        t_max = as.Date("2016-01-01"))
+  states_keep <- names(table(toy_outbreak_long[["cases"]]$State)[table(toy_outbreak_long[["cases"]]$State) > 20])
+  toy_outbreak_long[["cases"]] <- toy_outbreak_long[["cases"]][is.element(State, states_keep),]
 } else
-  data("toy_outbreak")
+  data("toy_outbreak_long")
 
-# Save elements of toy_outbreak
-dt_cases <- toy_outbreak[["cases"]]
+# Save elements of toy_outbreak_long
+dt_cases <- toy_outbreak_long[["cases"]]
 dt_cases <- dt_cases[order(Date), ]
-dt_regions <- toy_outbreak[["dt_regions"]]
+dt_regions <- toy_outbreak_long[["dt_regions"]]
 all_dist <- distGeo(matrix(c(rep(dt_regions$long, nrow(dt_regions)), 
                              rep(dt_regions$lat, nrow(dt_regions))), ncol = 2), 
                     matrix(c(rep(dt_regions$long, each = nrow(dt_regions)), 
@@ -52,14 +54,13 @@ all_dist <- distGeo(matrix(c(rep(dt_regions$long, nrow(dt_regions)),
 
 dist_mat <- matrix(all_dist/1000, nrow = nrow(dt_regions))
 pop_vect <- dt_regions$population
-age_contact <- toy_outbreak[["age_contact"]]
+age_contact <- toy_outbreak_long[["age_contact"]]
 
 names(pop_vect) <- rownames(dist_mat) <- colnames(dist_mat) <- dt_regions$region
 
 f_null <- function(data, param) {
   return(0.0)
 }
-
 #### o2geosocial analysis toy data: threshold and import ####
 
 ## No import, threshold = 0.01
@@ -80,15 +81,15 @@ config <- create_config(data = data,
                         spatial_method = "exponential",
                         gamma = 100,
                         delta = 30,
-                        n_iter = 70000, 
+                        n_iter = 50000, 
                         sample_every = 50, 
                         max_kappa = 5,
                         find_import = TRUE, 
                         outlier_threshold = 0.01, 
                         outlier_relative = FALSE,
-                        n_iter_import = 30000, 
+                        n_iter_import = 15000, 
                         sample_every_import = 50, verbatim = TRUE,
-                        burnin = 10000)
+                        burnin = 5000)
 priors <- custom_priors()
 likelihoods <- custom_likelihoods()
 moves <- custom_moves()
@@ -159,16 +160,15 @@ config <- create_config(data = data,
 out <- outbreaker(data = data,config = config,priors = priors,
                   likelihoods = likelihoods,moves = moves)
 saveRDS(out, file = "toy_outbreak_runs/with_import_095.rds")
-
+stop()
 #### o2geosocial analysis toy data: elements of likelihood ####
 
-
-## Import, no likelihood
+## Import, time only
 data <- outbreaker_data(dates = dt_cases$Date,
                         age_group = dt_cases$age_group,
                         region = dt_cases$county,
                         f_dens = matrix(exp(f), nrow = 1),
-                        w_dens = NULL, 
+                        w_dens = matrix(exp(w), nrow = 1), 
                         a_dens = NULL, 
                         genotype = rep("Not attributed", dim(dt_cases)[1]),
                         is_cluster = NULL,
@@ -176,51 +176,30 @@ data <- outbreaker_data(dates = dt_cases$Date,
                         distance = dist_mat,
                         import = dt_cases$import)
 
-config <- create_config(data = data, 
+config <- create_config(data = data, max_kappa = 2,
                         init_tree = "star", 
                         spatial_method = "exponential",
                         init_kappa = 1,
                         gamma = NULL,
-                        delta = NULL,
-                        n_iter = 70000, 
-                        n_iter_import = 30000, 
+                        delta = 30,
+                        n_iter = 50000, 
+                        n_iter_import = 15000, 
                         sample_every = 50, 
                         sample_every_import = 50, 
-                        burnin = 10000,
+                        burnin = 5000,
                         max_kappa = 5,
                         find_import = FALSE,
-                        outlier_threshold = 0.05,
+                        outlier_threshold = 0.05, verbatim = T,
                         outlier_relative = FALSE,
                         move_a = FALSE,
                         move_b = FALSE,
                         move_pi = FALSE,
-                        move_t_inf = FALSE,
-                        move_kappa = FALSE,
-                        move_swap_cases = FALSE)
+                        move_t_inf = TRUE,
+                        move_kappa = TRUE,
+                        move_swap_cases = TRUE)
 priors <- custom_priors()
 likelihoods <- custom_likelihoods(space = f_null, 
-                                  timing_infections = f_null,
-                                  timing_sampling = f_null,
-                                  age = f_null, reporting = f_null )
-moves <- custom_moves()
-out <- outbreaker(data = data,config = config,priors = priors,
-                  likelihoods = likelihoods,moves = moves)
-saveRDS(out, file = "toy_outbreak_runs/import_no_like.rds")
-
-
-## Import, time only
-data$w_dens = matrix(exp(w), nrow = 1)
-data$a_dens = matrix(polymod_prop, nrow = nrow(polymod_prop))
-data <- outbreaker_data(data = data)
-likelihoods <- custom_likelihoods(space = f_null, 
                                   age = f_null)
-config$delta <- 30
-config$move_t_inf <- TRUE
-config$move_kappa <- TRUE
-config$move_swap_cases <- TRUE
-config$init_alpha <- NULL
-config <- create_config(data = data,
-                        config)
 moves <- custom_moves()
 out <- outbreaker(data = data,config = config,priors = priors,
                   likelihoods = likelihoods,moves = moves)
@@ -253,6 +232,8 @@ saveRDS(out, file = paste0("toy_outbreak_runs/import_time_genotype_space.rds"))
 
 
 ## Import, time, genotype and age
+data$a_dens = matrix(polymod_prop, nrow = nrow(polymod_prop))
+data <- outbreaker_data(data = data)
 config$move_a <- FALSE
 config$move_b <- FALSE
 config$gamma <- NULL
@@ -268,32 +249,33 @@ saveRDS(out, file = paste0("toy_outbreak_runs/import_time_genotype_age.rds"))
 
 # Set seed
 set.seed(1)
-# Population per county
-pop_county <- dt_distance[!duplicated(county1), pop_county1]
-names(pop_county) <- dt_distance[!duplicated(county1), county1]
+
 # Draw the r0 in each state, following an exponential distribution
 r0_state <- rexp(n = length(unique(dt_state_county$STNAME)), 
                  rate = 1.5)
 names(r0_state) <- unique(dt_state_county$STNAME)
-r0_state[r0_state>1] <- 0.95
+r0_state[r0_state>1] <- 0.9
+
 # Spatial parameters
-a <- 0.84
-b <- 0.08
+c <- 0.84
+b <- 0.14
+
 # Spatial threshold
 gamma <- 100
-# Maximum number of cases in the generated dataset
-nb_cases <- 1000
-dt_cases <- toy_outbreak[["cases"]]
-dt_cases <- dt_cases[order(Date), ]
 
-toy_outbreak <- generate_dataset(a = a, b = b, gamma = gamma, 
-                                 dt_distance = dt_distance,
-                                 polymod_prop = polymod_prop, w = w, 
-                                 nb_cases = nb_cases, r0_state = r0_state, 
-                                 pop_county = pop_county, 
-                                 dt_state_county = dt_state_county,
-                                 t_min = as.Date("2010-01-01"), 
-                                 t_max = as.Date("2016-01-01"), prop_gen = 1) 
+# Maximum number of cases in the generated dataset
+nb_cases <- 2200
+
+toy_outbreak_long <- generate_dataset(b = b, c = c, gamma = gamma, 
+                                      dt_distance = dt_distance,
+                                      polymod_prop = polymod_prop, w = w, 
+                                      nb_cases = nb_cases, r0_state = r0_state, 
+                                      pop_county = pop_county, 
+                                      dt_state_county = dt_state_county,
+                                      t_min = as.Date("2003-01-01"), 
+                                      t_max = as.Date("2016-01-01"))
+states_keep <- names(table(toy_outbreak_long[["cases"]]$State)[table(toy_outbreak_long[["cases"]]$State) > 20])
+toy_outbreak_long[["cases"]] <- toy_outbreak_long[["cases"]][is.element(State, states_keep),]
 
 ## No import, threshold = 0.05, all genotype reported
 data <- outbreaker_data(dates = dt_cases$Date,
@@ -313,15 +295,15 @@ config <- create_config(data = data,
                         spatial_method = "exponential",
                         gamma = 100,
                         delta = 30,
-                        n_iter = 70000, 
+                        n_iter = 50000, 
                         sample_every = 50, 
                         max_kappa = 5,
                         find_import = TRUE, 
                         outlier_threshold = 0.05, 
                         outlier_relative = FALSE,
-                        n_iter_import = 30000, 
+                        n_iter_import = 15000, 
                         sample_every_import = 50, 
-                        burnin = 10000)
+                        burnin = 5000)
 priors <- custom_priors()
 likelihoods <- custom_likelihoods()
 moves <- custom_moves()
@@ -334,32 +316,33 @@ saveRDS(out, file = "toy_outbreak_runs/no_import_thresh005_all_gen.rds")
 
 # Set seed
 set.seed(1)
-# Population per county
-pop_county <- dt_distance[!duplicated(county1), pop_county1]
-names(pop_county) <- dt_distance[!duplicated(county1), county1]
+
 # Draw the r0 in each state, following an exponential distribution
 r0_state <- rexp(n = length(unique(dt_state_county$STNAME)), 
                  rate = 1.5)
 names(r0_state) <- unique(dt_state_county$STNAME)
-r0_state[r0_state>1] <- 0.95
+r0_state[r0_state>1] <- 0.9
+
 # Spatial parameters
-a <- 0.84
-b <- 0.08
+c <- 0.84
+b <- 0.14
+
 # Spatial threshold
 gamma <- 100
-# Maximum number of cases in the generated dataset
-nb_cases <- 1000
-dt_cases <- toy_outbreak[["cases"]]
-dt_cases <- dt_cases[order(Date), ]
 
-toy_outbreak <- generate_dataset(a = a, b = b, gamma = gamma, 
-                                 dt_distance = dt_distance,
-                                 polymod_prop = polymod_prop, w = w, 
-                                 nb_cases = nb_cases, r0_state = r0_state, 
-                                 pop_county = pop_county, 
-                                 dt_state_county = dt_state_county,
-                                 t_min = as.Date("2010-01-01"), 
-                                 t_max = as.Date("2016-01-01"), prop_gen = 0) 
+# Maximum number of cases in the generated dataset
+nb_cases <- 2200
+
+toy_outbreak_long <- generate_dataset(b = b, c = c, gamma = gamma, 
+                                      dt_distance = dt_distance,
+                                      polymod_prop = polymod_prop, w = w, 
+                                      nb_cases = nb_cases, r0_state = r0_state, 
+                                      pop_county = pop_county, 
+                                      dt_state_county = dt_state_county,
+                                      t_min = as.Date("2003-01-01"), 
+                                      t_max = as.Date("2016-01-01"))
+states_keep <- names(table(toy_outbreak_long[["cases"]]$State)[table(toy_outbreak_long[["cases"]]$State) > 20])
+toy_outbreak_long[["cases"]] <- toy_outbreak_long[["cases"]][is.element(State, states_keep),]
 
 ## No import, threshold = 0.05, no genotype reported
 data <- outbreaker_data(dates = dt_cases$Date,
@@ -379,15 +362,15 @@ config <- create_config(data = data,
                         spatial_method = "exponential",
                         gamma = 100,
                         delta = 30,
-                        n_iter = 70000, 
+                        n_iter = 50000, 
                         sample_every = 50, 
                         max_kappa = 5,
                         find_import = TRUE, 
                         outlier_threshold = 0.05, 
                         outlier_relative = FALSE,
-                        n_iter_import = 30000, 
+                        n_iter_import = 15000, 
                         sample_every_import = 50, 
-                        burnin = 10000)
+                        burnin = 5000)
 priors <- custom_priors()
 likelihoods <- custom_likelihoods()
 moves <- custom_moves()
