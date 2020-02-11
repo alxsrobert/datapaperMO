@@ -34,6 +34,12 @@ generate_figure_6(list_factor_import, ref_breaks)
 
 #### Plot supplement ####
 
+## Impact of the proportion of genotyped cases
+fig_hist_list <- list(fig_no_gen_sim, fig_005_sim, fig_all_gen_sim, fig_sim)
+list_fig_heatmap <- list(fig_no_gen_sim, fig_all_gen_sim)
+
+generate_figure_4_5(fig_hist_list, list_fig_heatmap)
+
 ##Section 1: description data
 supp_desc_data(dt_cases = dt_cases)
 
@@ -69,7 +75,7 @@ supp_fig_distance_transmission(list_out = list_out, burnin = burnin,
                                sample_every = sample_every, dt_cases = dt_cases)
 
 ## Sensitivity components of likelihood 
-fig_hist_list <- list(fig_no_like, fig_time, fig_time_gen, fig_time_age, fig_time_spa, fig_ref)
+fig_hist_list <- list(fig_time, fig_time_gen, fig_time_age, fig_time_spa, fig_ref)
 list_fig_heatmap <- list(fig_time_gen, fig_time_spa)
 
 generate_figure_4_5(fig_hist_list, list_fig_heatmap)
@@ -82,9 +88,3 @@ supp_fig_sec_overall(list_out, burnin, sample_every)
 list_out <- list(out_import, out_005, out_005_wi)
 supp_fig_sec_map(list_out, dt_cases)
 
-
-## Impact of the proportion of genotyped cases
-fig_hist_list <- list(fig_no_gen_sim, fig_005_sim, fig_all_gen_sim, fig_sim)
-list_fig_heatmap <- list(fig_no_gen_sim, fig_all_gen_sim)
-
-generate_figure_4_5(fig_hist_list, list_fig_heatmap)
