@@ -1,9 +1,7 @@
 ## Generate all the figures (main and supplement) from analysis of toy_outbreak
 
 # Load all runs
-source("R/load_analysis_likelihoods.R")
-source("R/load_analysis_threshold.R")
-source("R/load_analysis_genotype.R")
+source("R/load_all_analysis.R")
 
 #### Generate figure ####
 
