@@ -129,3 +129,12 @@ fig_095_wi <- prepare_for_figures(out = out_095_wi,
                                   sample_every = sample_every, 
                                   max_clust = max_clust,
                                   thresh_barplot = thresh_barplot, diff = diff)
+
+
+saveRDS(fig_001, file = "fig_runs/fig_001.rds")
+saveRDS(fig_005, file = "fig_runs/fig_005.rds")
+saveRDS(fig_09, file = "fig_runs/fig_09.rds")
+saveRDS(fig_095, file = "fig_runs/fig_095.rds")
+saveRDS(fig_import, file = "fig_runs/fig_import.rds")
+saveRDS(fig_005_wi, file = "fig_runs/fig_005_wi.rds")
+saveRDS(fig_095_wi, file = "fig_runs/fig_095_wi.rds")

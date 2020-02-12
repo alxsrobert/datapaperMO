@@ -96,3 +96,6 @@ fig_005_sim <- prepare_for_figures(out = out_005_sim, dt_cases = dt_cases, burni
                                    sample_every = sample_every, max_clust = max_clust,
                                    thresh_barplot = thresh_barplot, diff = diff)
 
+saveRDS(fig_no_gen_sim, file = "fig_runs/fig_no_gen_sim.rds")
+saveRDS(fig_all_gen_sim, file = "fig_runs/fig_all_gen_sim.rds")
+saveRDS(fig_005_sim, file = "fig_runs/fig_005_sim.rds")

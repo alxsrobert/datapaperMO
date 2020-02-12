@@ -100,3 +100,8 @@ fig_time_spa <- prepare_for_figures(out = out_time_spa, dt_cases = dt_cases,
                                     burnin = burnin, sample_every = sample_every, 
                                     max_clust = max_clust,
                                     thresh_barplot = thresh_barplot, diff = diff)
+
+saveRDS(fig_time, file = "fig_runs/fig_time.rds")
+saveRDS(fig_time_gen, file = "fig_runs/fig_time_gen.rds")
+saveRDS(fig_time_age, file = "fig_runs/fig_time_age.rds")
+saveRDS(fig_time_spa, file = "fig_runs/fig_time_spa.rds")
