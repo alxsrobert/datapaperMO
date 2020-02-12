@@ -70,9 +70,9 @@ size_cluster_ref_singletons[1] <- size_cluster_ref_barplot[1]
 med_ref <- rep(size_cluster_ref_barplot %>% sum, 2)
 names(med_ref) <- c("Imports", "Import status \ncorrectly inferred")
 
-fig_ref <- list(med_size_cluster_barplot = size_cluster_ref_barplot,
-                med_prop_singletons = size_cluster_ref_barplot,
-                med = med_ref)
+fig_sim <- fig_ref <- list(med_size_cluster_barplot = size_cluster_ref_barplot,
+                           med_prop_singletons = size_cluster_ref_barplot,
+                           med = med_ref)
 
 #### Load all analysis ####
 
@@ -120,5 +120,5 @@ fig_all_gen_sim <- readRDS(file = "fig_runs/fig_all_gen_sim.rds")
 
 ## Inference with absolute threshold (k = 0.05) and 40% of genotyped cases (same as data)
 out_005_sim <- readRDS(file = "toy_outbreak_runs/no_import_thresh005.rds")
-fig_sim <- readRDS(file = "fig_runs/fig_005_sim.rds")
+fig_005_sim <- readRDS(file = "fig_runs/fig_005_sim.rds")
 
